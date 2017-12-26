@@ -201,7 +201,7 @@ class Generator
                         }
                         \assert($t->through === $g);
                         for ($y = $t->items; $y !== null; $y = $y->next) {
-                            if ($y->item === $s) {
+                            if ($y->item == $s) {
                                 break;
                             }
                         }
