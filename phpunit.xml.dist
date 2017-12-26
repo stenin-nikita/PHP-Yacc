@@ -12,7 +12,7 @@
          bootstrap="./vendor/autoload.php">
     <testsuites>
         <testsuite name="PhpYacc Test Suite">
-            <directory>./lib</directory>
+            <directory>./tests</directory>
         </testsuite>
     </testsuites>
 
