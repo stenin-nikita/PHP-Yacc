@@ -41,7 +41,7 @@ abstract class MacroAbstract implements Macro
                 $tokens[] = new Token($type, $buffer, $lineNumber, $filename);
                 $buffer = '';
             } else {
-                $tokens[] = new Token($string[$i], $string[$i++], $lineNumber, $filename);
+                $tokens[] = new Token(Token::UNKNOW, $string[$i++], $lineNumber, $filename);
             }
         }
 

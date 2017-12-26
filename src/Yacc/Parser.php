@@ -69,6 +69,8 @@ class Parser
      * @param string $code
      * @param Context|null $context
      * @return Context
+     * @throws ParseException
+     * @throws \PhpYacc\Exception\LexingException
      */
     public function parse(string $code, Context $context = null)
     {
@@ -95,16 +97,17 @@ class Parser
      * @param array $attribute
      * @return string
      * @throws ParseException
+     * @throws \PhpYacc\Exception\LexingException
      */
     protected function copyAction(array $symbols, int $n, $delm, array $attribute): string
     {
         $tokens = [];
         $ct = 0;
 
-        while (($t = $this->lexer->rawGet())->t !== $delm || $ct > 0) {
-            switch ($t->t) {
-                case Lexer::EOF:
-                    throw ParseException::unexpected($t, Token::decode($delm));
+        while (($token = $this->lexer->getRawToken())->getValue() !== $delm || $ct > 0) {
+            switch ($token->getValue()) {
+                case "\0":
+                    throw ParseException::unexpected($token, Token::decode($delm));
                 case '{':
                     $ct++;
                     break;
@@ -112,41 +115,43 @@ class Parser
                     $ct--;
                     break;
             }
-            $tokens[] = $t;
+            $tokens[] = $token;
         }
 
         $expanded = $this->macros->apply($this->context, $symbols, $tokens, $n, $attribute);
 
-        $action = \implode('', \array_map(function (Token $t) {
-            return $t->v;
+        $action = \implode('', \array_map(function (Token $token) {
+            return $token->getValue();
         }, $expanded));
 
         return $action;
     }
 
     /**
-     * @return void
+     * @throws ParseException
+     * @throws \PhpYacc\Exception\LexingException
      */
     protected function doType()
     {
         $type = $this->getType();
         while (true) {
-            if (($t = $this->lexer->get())->v === ',') {
+            if (($token = $this->lexer->getToken())->getValue() === ',') {
                 continue;
             }
-            if ($t->t !== Token::NAME && $t->t !== "'") {
+            if ($token->getType() !== Token::NAME && $token->getValue()[0] !== "'") {
                 break;
             }
-            $p = $this->context->internSymbol($t->v, false);
+            $p = $this->context->internSymbol($token->getValue(), false);
             if ($type !== null) {
                 $p->type = $type;
             }
         }
-        $this->lexer->unget();
+        $this->lexer->ungetToken();
     }
 
     /**
      * @throws ParseException
+     * @throws \PhpYacc\Exception\LexingException
      */
     protected function doGrammar()
     {
@@ -157,38 +162,38 @@ class Parser
         $r->body = [$this->startPrime];
         $this->context->addGram($r);
 
-        $t = $this->lexer->get();
+        $token = $this->lexer->getToken();
 
-        while ($t->t !== Token::MARK && $t->t !== Lexer::EOF) {
-            if ($t->t === Token::NAME) {
-                if ($this->lexer->peek()->t === '@') {
-                    $attribute[0] = $t->v;
-                    $this->lexer->get();
-                    $t = $this->lexer->get();
+        while ($token->getType() !== Token::MARK && $token->getType() !== Token::EOF) {
+            if ($token->getType() === Token::NAME) {
+                if ($this->lexer->peek()->getValue()[0] === '@') {
+                    $attribute[0] = $token->getValue();
+                    $this->lexer->getToken();
+                    $token = $this->lexer->getToken();
                 } else {
                     $attribute[0] = null;
                 }
-                $gbuffer[0] = $this->context->internSymbol($t->v, false);
+                $gbuffer[0] = $this->context->internSymbol($token->getValue(), false);
                 $attribute[1] = null;
                 if ($gbuffer[0]->isterminal) {
-                    throw new \RuntimeException("Nonterminal symbol expected: $t");
-                } elseif (($tmp = $this->lexer->get())->t !== ':') {
+                    throw new \RuntimeException("Nonterminal symbol expected: $token");
+                } elseif (($tmp = $this->lexer->getToken())->getType() !== Token::COLON) {
                     throw new \RuntimeException("':' expected, $tmp found");
                 }
                 if ($this->context->startSymbol === null) {
                     $this->context->startSymbol = $gbuffer[0];
                 }
-            } elseif ($t->t === '|') {
+            } elseif ($token->getValue()[0] === '|') {
                 if (!$gbuffer[0]) {
-                    throw new \RuntimeException("Syntax Error, unexpected $t");
+                    throw new \RuntimeException("Syntax Error, unexpected $token");
                 }
                 $attribute[1] = null;
-            } elseif ($t->t === Token::BEGININC) {
+            } elseif ($token->getType() === Token::BEGININC) {
                 $this->doCopy();
-                $t = $this->lexer->get();
+                $token = $this->lexer->getToken();
                 continue;
             } else {
-                throw new \RuntimeException("Syntax Error Unexpected $t");
+                throw new \RuntimeException("Syntax Error Unexpected $token");
             }
 
             $lastTerm = $this->startPrime;
@@ -196,27 +201,28 @@ class Parser
             $pos = 0;
             $i = 1;
             while (true) {
-                $t = $this->lexer->get();
-                if ($t->t === '=') {
-                    $pos = $t->ln;
-                    if (($t = $this->lexer->get())->t === '{') {
-                        $pos = $t->ln;
+                $token = $this->lexer->getToken();
+
+                if ($token->getValue()[0] === '=') {
+                    $pos = $token->getLine();
+                    if (($token = $this->lexer->getToken())->getValue()[0] === '{') {
+                        $pos = $token->getLine();
                         $action = $this->copyAction($gbuffer, $i - 1, '}', $attribute);
                     } else {
-                        $this->lexer->unget();
+                        $this->lexer->ungetToken();
                         $action = $this->copyAction($gbuffer, $i - 1, ';', $attribute);
                     }
-                } elseif ($t->t === '{') {
-                    $pos = $t->ln;
+                } elseif ($token->getValue()[0] === '{') {
+                    $pos = $token->getLine();
                     $action = $this->copyAction($gbuffer, $i - 1, '}', $attribute);
-                } elseif ($t->t === Token::PRECTOK) {
-                    $lastTerm = $this->context->internSymbol($this->lexer->get()->v, false);
-                } elseif ($t->t === Token::NAME && $this->lexer->peek()->t === ':') {
+                } elseif ($token->getType() === Token::PRECTOK) {
+                    $lastTerm = $this->context->internSymbol($this->lexer->getToken()->getValue(), false);
+                } elseif ($token->getType() === Token::NAME && $this->lexer->peek()->getValue()[0] === ':') {
                     break;
-                } elseif ($t->t === Token::NAME && $this->lexer->peek()->t === '@') {
-                    $attribute[$i] = $t->v;
-                    $this->lexer->get();
-                } elseif ($t->t === Token::NAME || $t->t === "'") {
+                } elseif ($token->getType() === Token::NAME && $this->lexer->peek()->getValue()[0] === '@') {
+                    $attribute[$i] = $token->getValue();
+                    $this->lexer->getToken();
+                } elseif ($token->getType() === Token::NAME || $token->getValue()[0] === "'") {
                     if ($action) {
                         $g = $this->context->genNonTerminal();
                         $r = new Production($action, $pos);
@@ -226,7 +232,7 @@ class Parser
                         $r->link = $r->body[0]->value;
                         $g->value = $this->context->addGram($r);
                     }
-                    $gbuffer[$i++] = $w = $this->context->internSymbol($t->v, false);
+                    $gbuffer[$i++] = $w = $this->context->internSymbol($token->getValue(), false);
                     $attribute[$i] = null;
                     if ($w->isterminal) {
                         $lastTerm = $w;
@@ -249,8 +255,8 @@ class Parser
             $r->link = $r->body[0]->value;
             $gbuffer[0]->value = $this->context->addGram($r);
 
-            if ($t->t === ';') {
-                $t = $this->lexer->get();
+            if ($token->getType() === Token::SEMICOLON) {
+                $token = $this->lexer->getToken();
             }
         }
 
@@ -276,6 +282,7 @@ class Parser
 
     /**
      * @throws ParseException
+     * @throws \PhpYacc\Exception\LexingException
      */
     protected function doDeclaration()
     {
@@ -285,13 +292,13 @@ class Parser
         $this->errorToken = $this->context->internSymbol("error", true);
         $this->startPrime = $this->context->internSymbol("\$start", false);
 
-        while (($t = $this->lexer->get())->t !== Token::MARK) {
-            switch ($t->t) {
+        while (($token = $this->lexer->getToken())->getType() !== Token::MARK) {
+            switch ($token->getType()) {
                 case Token::TOKEN:
                 case Token::RIGHT:
                 case Token::LEFT:
                 case Token::NONASSOC:
-                    $this->doToken($t);
+                    $this->doToken($token);
                     break;
 
                 case Token::BEGININC:
@@ -308,28 +315,28 @@ class Parser
                     break;
 
                 case Token::EXPECT:
-                    $t = $this->lexer->get();
-                    if ($t->t === Token::NUMBER) {
-                        $this->context->expected = (int) $t->v;
+                    $token = $this->lexer->getToken();
+                    if ($token->getType() === Token::NUMBER) {
+                        $this->context->expected = (int) $token->getValue();
                     } else {
-                        throw ParseException::unexpected($t, Token::NUMBER);
+                        throw ParseException::unexpected($token, Token::NUMBER);
                     }
                     break;
 
                 case Token::START:
-                    $t = $this->lexer->get();
-                    $this->context->startSymbol = $this->context->internSymbol($t->v, false);
+                    $token = $this->lexer->getToken();
+                    $this->context->startSymbol = $this->context->internSymbol($token->getValue(), false);
                     break;
 
                 case Token::PURE_PARSER:
                     $this->context->pureFlag = true;
                     break;
 
-                case Lexer::EOF:
+                case Token::EOF:
                     throw new ParseException("No grammar given");
 
                 default:
-                    throw new ParseException("Syntax error, unexpected {$t->v}");
+                    throw new ParseException("Syntax error, unexpected {$token->getValue()}");
             }
         }
 
@@ -347,25 +354,26 @@ class Parser
     /**
      * @param Token $tag
      * @throws ParseException
+     * @throws \PhpYacc\Exception\LexingException
      */
     protected function doToken(Token $tag)
     {
         $preIncr = 0;
         $type = $this->getType();
-        $t = $this->lexer->get();
+        $token = $this->lexer->getToken();
 
-        while ($t->t === Token::NAME || $t->t === "'") {
-            $p = $this->context->internSymbol($t->v, true);
+        while ($token->getType() === Token::NAME || $token->getType() === Token::STRING) {
+            $p = $this->context->internSymbol($token->getValue(), true);
 
             if ($p->name[0] === "'") {
-                $p->value = Utils::characterValue(substr($p->name, 1, -1));
+                $p->value = Utils::characterValue(\mb_substr($p->name, 1, -1));
             }
 
             if ($type) {
                 $p->type = $type;
             }
 
-            switch ($tag->t) {
+            switch ($tag->getType()) {
                 case Token::LEFT:
                     $p->associativity |= Symbol::LEFT;
                     break;
@@ -377,51 +385,53 @@ class Parser
                     break;
             }
 
-            if ($tag->t !== Token::TOKEN) {
+            if ($tag->getType() !== Token::TOKEN) {
                 $p->precedence = $this->currentPrecedence;
                 $preIncr = 1;
             }
 
-            $t = $this->lexer->get();
-            if ($t->t === Token::NUMBER) {
+            $token = $this->lexer->getToken();
+            if ($token->getType() === Token::NUMBER) {
                 if ($p->value === null) {
-                    $p->value = (int) $t->v;
+                    $p->value = (int) $token->getValue();
                 } else {
                     throw new ParseException(sprintf("Unexpected Token::NUMBER as %s already has a value", $p->name));
                 }
-                $t = $this->lexer->get();
+                $token = $this->lexer->getToken();
             }
-            if ($t->t === ',') {
-                $t = $this->lexer->get();
+
+            if ($token->getType() === Token::COMMA) {
+                $token = $this->lexer->getToken();
             }
         }
 
-        $this->lexer->unget();
+        $this->lexer->ungetToken();
         $this->currentPrecedence += $preIncr;
     }
 
     /**
      * @return null|Symbol
      * @throws ParseException
+     * @throws \PhpYacc\Exception\LexingException
      */
     protected function getType()
     {
-        $t = $this->lexer->get();
+        $token = $this->lexer->getToken();
 
-        if ($t->t !== '<') {
-            $this->lexer->unget();
+        if ($token->getValue()[0] !== '<') {
+            $this->lexer->ungetToken();
             return null;
         }
 
         $ct = 1;
         $p = '';
-        $t = $this->lexer->get();
+        $token = $this->lexer->getToken();
 
         while (true) {
-            switch ($t->t) {
+            switch ($token->getValue()[0]) {
                 case "\n":
-                case Lexer::EOF:
-                    throw ParseException::unexpected($t, ">");
+                case "\0":
+                    throw ParseException::unexpected($token, ">");
 
                 case '<':
                     $ct++;
@@ -435,8 +445,8 @@ class Parser
                 break;
             }
 
-            $p .= $t->v;
-            $t = $this->lexer->rawGet();
+            $p .= $token->getValue();
+            $token = $this->lexer->getRawToken();
         }
         $this->context->unioned = true;
 

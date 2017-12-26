@@ -1,5 +1,5 @@
 {
-    "name": "ircmaxell/php-yacc",
+    "name": "stenin-nikita/php-yacc",
     "description": "A PHP YACC Parser-Generator library",
     "license": "Apache 2.0",
     "authors": [

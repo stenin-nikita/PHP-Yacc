@@ -79,6 +79,7 @@ class Symbol
      * @param int $precedence
      * @param int $associativity
      * @param Symbol|null $type
+     * @throws LogicException
      */
     public function __construct(int $code, string $name, $value = null, int $terminal = self::UNDEF, int $precedence = self::UNDEF, int $associativity = self::UNDEF, Symbol $type = null)
     {
@@ -119,6 +120,7 @@ class Symbol
 
     /**
      * @param int $terminal
+     * @throws LogicException
      */
     public function setTerminal(int $terminal)
     {
@@ -159,9 +161,9 @@ class Symbol
     public function setValue($value)
     {
         if ($this->isterminal && !is_int($value)) {
-            throw new \LogicException("Terminals value must be an integer, " . \gettype($value) . " provided");
+            throw new LogicException("Terminals value must be an integer, " . \gettype($value) . " provided");
         } elseif ($this->isnonterminal  && !($value instanceof Production || $value === null)) {
-            throw new \LogicException("NonTerminals value must be a production, " . \gettype($value) . " provided");
+            throw new LogicException("NonTerminals value must be a production, " . \gettype($value) . " provided");
         }
         $this->_value = $value;
     }

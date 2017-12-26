@@ -248,7 +248,7 @@ class Context
             case 'nonterminals': return $this->nonTerminals();
         }
         if (!isset($this->{'_' . $name})) {
-            throw new \LogicException("Should never happen: unknown property $name");
+            throw new LogicException("Should never happen: unknown property $name");
         }
         return $this->{'_' . $name};
     }

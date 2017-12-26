@@ -59,6 +59,7 @@ class Template
      * @param Language $language
      * @param string $template
      * @param Context $context
+     * @throws TemplateException
      */
     public function __construct(Language $language, string $template, Context $context)
     {
@@ -274,6 +275,7 @@ class Template
      */
     protected function skipif(string $spec): bool
     {
+        dump($spec);
         [ $dump, $test ] = \explode(' ', $spec, 2);
         $test = \trim($test);
         switch ($test) {

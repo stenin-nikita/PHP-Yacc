@@ -9,20 +9,15 @@ declare(strict_types=1);
 
 namespace PhpYacc\Yacc;
 
-use PhpYacc\Support\Utils;
 use PhpYacc\Exception\LexingException;
 use PhpYacc\Exception\ParseException;
+use PhpYacc\Support\Utils;
 
 /**
  * Class Lexer
  */
 class Lexer
 {
-    /**
-     * End of file
-     */
-    public const EOF = "EOF";
-
     /**
      * Whitespace tokens
      */
@@ -53,9 +48,9 @@ class Lexer
     ];
 
     /**
-     * @var bool
+     * @var string
      */
-    protected $prevIsDollar = false;
+    protected $buffer;
 
     /**
      * @var string
@@ -65,17 +60,22 @@ class Lexer
     /**
      * @var int
      */
-    protected $lineNumber = 0;
-
-    /**
-     * @var string
-     */
-    protected $buffer = '';
+    protected $line;
 
     /**
      * @var int
      */
-    protected $bufferOffset = 0;
+    protected $offset;
+
+    /**
+     * @var Token
+     */
+    protected $currentToken;
+
+    /**
+     * @var Token
+     */
+    protected $backToken;
 
     /**
      * @var string
@@ -83,36 +83,60 @@ class Lexer
     protected $backChar;
 
     /**
-     * @var string|null
+     * @var bool
      */
-    protected $backToken;
-
-    /**
-     * @var Token
-     */
-    protected $token;
+    protected $prevIsDollar;
 
     /**
      * @param string $code
      * @param string $filename
      */
-    public function startLexing(string $code, string $filename)
+    public function startLexing(string $code, string $filename = '')
     {
+        $this->buffer   = $code;
         $this->filename = $filename;
-        $this->buffer = $code;
-        $this->bufferOffset = 0;
-        $this->backChar = null;
-        $this->backToken = null;
-        $this->token = null;
+
+        $this->reset();
+    }
+
+    /**
+     * @return void
+     */
+    protected function reset()
+    {
+        $this->line         = 1;
+        $this->offset       = 0;
+        $this->backChar     = null;
+        $this->backToken    = null;
         $this->prevIsDollar = false;
     }
 
     /**
-     * @return int
+     * @return Token
+     * @throws LexingException
+     * @throws ParseException
      */
-    public function getLineNumber(): int
+    public function getToken(): Token
     {
-        return $this->lineNumber;
+        $this->currentToken = $this->getRawToken();
+
+        while (in_array($this->currentToken->getType(), self::SPACE_TOKENS)) {
+            $this->currentToken = $this->getRawToken();
+        }
+
+        return $this->currentToken;
+    }
+
+    /**
+     * @throws LexingException
+     */
+    public function ungetToken()
+    {
+        if ($this->backToken !== null) {
+            throw new LexingException("Too many ungetToken calls");
+        }
+
+        $this->backToken = $this->currentToken;
     }
 
     /**
@@ -122,8 +146,8 @@ class Lexer
      */
     public function peek(): Token
     {
-        $result = $this->get();
-        $this->unget();
+        $result = $this->getToken();
+        $this->ungetToken();
 
         return $result;
     }
@@ -133,225 +157,216 @@ class Lexer
      * @throws LexingException
      * @throws ParseException
      */
-    public function get(): Token
-    {
-        $this->token = $this->rawGet();
-
-        while (in_array($this->token->t, self::SPACE_TOKENS)) {
-            $this->token = $this->rawGet();
-        }
-
-        return $this->token;
-    }
-
-    /**
-     * @throws LexingException
-     */
-    public function unget()
-    {
-        if ($this->backToken) {
-            throw new LexingException("Too many unget Token calls");
-        }
-
-        $this->backToken = $this->token;
-    }
-
-    /**
-     * @return Token
-     * @throws LexingException
-     * @throws ParseException
-     */
-    public function rawGet(): Token
+    public function getRawToken()
     {
         if ($this->backToken !== null) {
-            $this->token = $this->backToken;
+            $this->currentToken = $this->backToken;
             $this->backToken = null;
 
-            return $this->token;
+            return $this->currentToken;
         }
 
-        $c = $this->getc();
+        $char = $this->getChar();
 
-        $p = '';
+        $buffer = "";
 
-        if (Utils::isWhite($c)) {
-            while (Utils::isWhite($c)) {
-                $p .= $c;
-                $c = $this->getc();
+        // Whitespace
+        if (Utils::isWhite($char)) {
+            while (Utils::isWhite($char)) {
+                $buffer .= $char;
+                $char = $this->getChar();
+
             }
-            $this->ungetc($c);
+            $this->ungetChar($char);
 
-            return $this->token(Token::SPACE, $p);
+            return $this->token(Token::SPACE, $buffer);
         }
 
-        if ($c === "\n") {
-            $this->lineNumber++;
+        // End of line
+        if ($char === "\n") {
+            $this->line++;
 
-            return $this->token(Token::NEWLINE, $c);
+            return $this->token(Token::NEWLINE, $char);
         }
 
-        if ($c === "/") {
-            if (($c = $this->getc()) === '*') {
-                // skip comments
-                $p = "/*";
+        // Comment
+        if ($char === '/') {
+            if (($char = $this->getChar()) === '*') {
+                $buffer = '/*';
 
                 while (true) {
-                    if (($c = $this->getc()) === '*') {
-                        if (($c = $this->getc()) === '/') {
+                    if (($char = $this->getChar()) === '*') {
+                        if (($c = $this->getChar()) === '/') {
                             break;
                         }
-                        $this->ungetc($c);
+                        $this->ungetChar($char);
                     }
-                    if ($c === self::EOF) {
-                        throw ParseException::unexpected($this->token(self::EOF, ''), "*/");
+
+                    if ($char === "\0") {
+                        throw ParseException::unexpected($this->token(Token::EOF, "\0"), '*/');
                     }
-                    $p .= $c;
+
+                    $buffer .= $char;
                 }
 
-                $p .= "*/";
+                $buffer .= '*/';
 
-                return $this->token(Token::COMMENT, $p);
-            } elseif ($c === '/') {
-                // skip // comment
-                $p = '//';
+                return $this->token(Token::COMMENT, $buffer);
+            } elseif ($char === '/') {
+                $buffer = '//';
 
                 do {
-                    $c = $this->getc();
-                    if ($c !== self::EOF) {
-                        $p .= $c;
+                    $char = $this->getChar();
+                    if ($char !== "\0") {
+                        $buffer .= $char;
                     }
-                } while ($c !== "\n" && $c !== self::EOF);
+                } while ($char !== "\n" && $char !== "\0");
 
-                return $this->token(Token::COMMENT, $p);
+                return $this->token(Token::COMMENT, $buffer);
             }
 
-            $this->ungetc($c);
-            $c = '/';
+            $this->ungetChar($char);
+            $char = '/';
         }
 
-        if ($c === self::EOF) {
-            return $this->token(self::EOF, '');
+        // End of file
+        if ($char === "\0") {
+            return $this->token(Token::EOF, "\0");
         }
 
-        $tag = $c;
-        if ($c === '%') {
-            $c = $this->getc();
-            if ($c === '%' || $c === '{' | $c === '}' || Utils::isSymChar($c)) {
-                $p .= "%";
+        $tag = Token::UNKNOW;
+
+        if ($char === '%') {
+            $char = $this->getChar();
+            if ($char === '%' || $char === '{' | $char === '}' || Utils::isSymChar($char)) {
+                $buffer .= "%";
             } else {
-                $this->ungetc($c);
-                $c = '%';
+                $this->ungetChar($char);
+                $char = '%';
             }
         }
 
-        if ($c === '$') {
-            if (!$this->prevIsDollar) {
-                $p .= '$';
-                $c = $this->getc();
-                if ($c === '$') {
-                    $this->ungetc($c);
+        if ($char === '$') {
+            if (! $this->prevIsDollar) {
+                $buffer .= '$';
+                $char = $this->getChar();
+
+                if ($char === '$') {
+                    $this->ungetChar($char);
                     $this->prevIsDollar = true;
-                } elseif (!ctype_digit($c) && Utils::isSymChar($c)) {
+                } elseif (! \ctype_digit($char) && Utils::isSymChar($char)) {
                     do {
-                        $p .= $c;
-                        $c = $this->getc();
-                    } while (Utils::isSymChar($c));
-                    $this->ungetc($c);
+                        $buffer .= $char;
+                        $char = $this->getChar();
+                    } while (Utils::isSymChar($char));
+                    $this->ungetChar($char);
                     $tag = Token::NAME;
                 } else {
-                    $this->ungetc($c);
+                    $this->ungetChar($char);
                 }
             } else {
-                $p .= '$';
+                $buffer .= '$';
                 $this->prevIsDollar = false;
             }
-        } elseif (Utils::isSymChar($c)) {
+        } elseif (Utils::isSymChar($char)) {
             do {
-                $p .= $c;
-                $c = $this->getc();
-            } while ($c !== self::EOF && Utils::isSymChar($c));
+                $buffer .= $char;
+                $char = $this->getChar();
+            } while ($char !== "\0" && Utils::isSymChar($char));
 
-            $this->ungetc($c);
-            $tag = ctype_digit($p) ? Token::NUMBER : Token::NAME;
-        } elseif ($c === '\'' || $c === '"') {
-            $p .= $c;
+            $this->ungetChar($char);
+            $tag = \ctype_digit($buffer) ? Token::NUMBER : Token::NAME;
+        } elseif ($char === '\'' || $char === '"') {
+            $quote = $char;
+            $buffer .= $char;
 
-            while (($c = $this->getc()) !== $tag) {
-                if ($c === self::EOF) {
-                    throw ParseException::unexpected($this->token("EOF", ''), $tag);
+            while (($char = $this->getChar()) !== $quote) {
+                if ($char === "\0") {
+                    throw ParseException::unexpected($this->token(Token::EOF, "\0"), $quote);
                 }
 
-                if ($c === "\n") {
-                    throw ParseException::unexpected($this->token(Token::NEWLINE, "\n"), $tag);
+                if ($char === "\n") {
+                    throw ParseException::unexpected($this->token(Token::NEWLINE, "\n"), $quote);
                 }
 
-                $p .= $c;
-                if ($c === '\\') {
-                    $c = $this->getc();
-                    if ($c === self::EOF) {
+                $buffer .= $char;
+                if ($char === '\\') {
+                    $char = $this->getChar();
+
+                    if ($char === "\0") {
                         break;
                     }
-                    if ($c === "\n") {
+
+                    if ($char === "\n") {
                         continue;
                     }
-                    $p .= $c;
+
+                    $buffer .= $char;
                 }
             }
-            $p .= $c;
+            $buffer .= $char;
+            $tag = Token::STRING;
         } else {
-            $p .= $c;
+            $buffer .= $char;
         }
 
-        if (isset(self::TAG_MAP[$p])) {
-            $tag = self::TAG_MAP[$p];
+        if (isset(self::TAG_MAP[$buffer])) {
+            return $this->token(self::TAG_MAP[$buffer], $buffer);
         }
 
-        return $this->token($tag, $p);
-    }
+        if ($buffer === ':') {
+            return $this->token(Token::COLON, $buffer);
+        }
+        if ($buffer === ';') {
+            return $this->token(Token::SEMICOLON, $buffer);
+        }
 
-    /**
-     * @param $id
-     * @param $value
-     * @return Token
-     */
-    protected function token($id, $value): Token
-    {
-        return new Token($id, $value, $this->lineNumber, $this->filename);
+        return $this->token($tag, $buffer);
     }
 
     /**
      * @return string
      */
-    protected function getc(): string
+    protected function getChar(): string
     {
         if ($this->backChar !== null) {
             $result = $this->backChar;
             $this->backChar = null;
 
-            return (string) $result;
+            return $result;
         }
 
-        if ($this->bufferOffset >= strlen($this->buffer)) {
-            return self::EOF;
+        if ($this->offset >= \mb_strlen($this->buffer)) {
+            return "\0";
         }
 
-        return $this->buffer[$this->bufferOffset++];
+        return $this->buffer[$this->offset++];
     }
 
     /**
-     * @param string $c
+     * @param string $char
      * @throws LexingException
      */
-    protected function ungetc(string $c)
+    protected function ungetChar(string $char)
     {
-        if ($c === self::EOF) {
+        if ($char == "\0") {
             return;
         }
 
         if ($this->backChar !== null) {
-            throw new LexingException("To many unget calls");
+            throw new LexingException("To many ungetChar calls");
         }
 
-        $this->backChar = $c;
+        $this->backChar = $char;
+    }
+
+    /**
+     * @param int $type
+     * @param string $value
+     * @return Token
+     */
+    protected function token(int $type, string $value): Token
+    {
+        return new Token($type, $value, $this->line, $this->filename);
     }
 }

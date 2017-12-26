@@ -32,76 +32,80 @@ class DollarExpansion extends MacroAbstract
      * @param array $attribute
      * @return \Generator
      * @throws ParseException
+     * @throws \PhpYacc\Exception\LogicException
      */
     public function apply(Context $ctx, array $symbols, \Iterator $tokens, int $n, array $attribute): \Generator
     {
         $type = null;
         for ($tokens->rewind(); $tokens->valid(); $tokens->next()) {
-            $t = $tokens->current();
-            switch ($t->t) {
+            /** @var Token $token */
+            $token = $tokens->current();
+            switch ($token->getType()) {
                 case Token::NAME:
                     $type = null;
                     $v = -1;
 
                     for ($i = 0; $i <= $n; $i++) {
-                        if ($symbols[$i]->name === $t->v) {
+                        if ($symbols[$i]->name === $token->getValue()) {
                             if ($v < 0) {
                                 $v = $i;
                             } else {
-                                throw new ParseException("Ambiguous semantic value reference for $t");
+                                throw new ParseException("Ambiguous semantic value reference for $token");
                             }
                         }
                     }
 
                     if ($v < 0) {
                         for ($i = 0; $i <= $n; $i++) {
-                            if ($attribute[$i] === $t->v) {
+                            if ($attribute[$i] === $token->getValue()) {
                                 $v = $i;
                                 break;
                             }
                         }
 
-                        if ($t->v === $attribute[$n + 1]) {
+                        if ($token->getValue() === $attribute[$n + 1]) {
                             $v = 0;
                         }
                     }
 
                     if ($v >= 0) {
-                        $t = clone $t;
-                        $t->t = $v === 0 ? '$' : 0;
+                        $token = new Token($v === 0 ? '$' : 0, $token->getValue(), $token->getLine(), $token->getFilename());
                         goto semval;
                     }
                     break;
 
-                case '$':
+                case Token::UNKNOW:
+                    if ($token->getValue() !== '$') {
+                        break;
+                    }
                     $type = null;
-                    $t = self::next($tokens);
-                    if ($t->t === '<') {
-                        $t = self::next($tokens);
-                        if ($t->t !== Token::NAME) {
-                            throw ParseException::unexpected($t, Token::NAME);
+                    $token = self::next($tokens);
+                    if ($token->getId() === '<') {
+                        $token = self::next($tokens);
+                        if ($token->getId() !== Token::NAME) {
+                            throw ParseException::unexpected($token, Token::NAME);
                         }
-                        $type = $ctx->intern($t->v);
+                        $type = $ctx->intern($token->getValue());
                         $dump = self::next($tokens);
-                        if ($dump->t !== '>') {
+                        if ($dump->getId() !== '>') {
                             throw ParseException::unexpected($dump, '>');
                         }
-                        $t = self::next($tokens);
+                        $token = self::next($tokens);
                     }
 
-                    if ($t->t === '$') {
+                    if ($token->getValue()[0] === '$') {
                         $v = 0;
-                    } else if ($t->t === '-') {
-                        $t = self::next($tokens);
-                        if ($t->t !== Token::NUMBER) {
-                            throw ParseException::unexpected($t, Token::NUMBER);
+                    } else if ($token->getValue()[0] === '-') {
+                        $token = self::next($tokens);
+                        if ($token->getId() !== Token::NUMBER) {
+                            throw ParseException::unexpected($token, Token::NUMBER);
                         }
-                        $v = -1 * ((int) $t->v);
+                        $v = -1 * ((int) $token->getValue());
                     } else {
-                        if ($t->t !== Token::NUMBER) {
+                        if ($token->getId() !== Token::NUMBER) {
                             throw new \RuntimeException("Number expected");
                         }
-                        $v = (int) $t->v;
+                        $v = (int) $token->getValue();
                         if ($v > $n) {
                             throw new \RuntimeException("N is too big");
                         }
@@ -115,14 +119,14 @@ semval:
                         throw new ParseException("Type not defined for " . $symbols[$v]->name);
                     }
 
-                    foreach ($this->parseDollar($ctx, $t, $v, $n, $type ? $type->name : null) as $t) {
-                        yield $t;
+                    foreach ($this->parseDollar($ctx, $token, $v, $n, $type ? $type->name : null) as $token) {
+                        yield $token;
                     }
 
                     continue 2;
             }
 
-            yield $t;
+            yield $token;
         }
     }
 
@@ -134,9 +138,9 @@ semval:
      * @param string|null $type
      * @return array
      */
-    protected function parseDollar(Context $ctx, Token $t, int $nth, int $len, string $type = null): array
+    protected function parseDollar(Context $ctx, Token $token, int $nth, int $len, string $type = null): array
     {
-        if ($t->t === '$') {
+        if ($token->getValue() === '$') {
             if ($type) {
                 $mp = $ctx->macros[self::SEMVAL_LHS_TYPED];
             } else {
@@ -171,6 +175,6 @@ semval:
                 $result .= $mp[$i];
             }
         }
-        return $this->parse($result, $t->ln, $t->fn);
+        return $this->parse($result, $token->getLine(), $token->getFilename());
     }
 }

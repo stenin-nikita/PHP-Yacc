@@ -13,33 +13,37 @@ use PhpYacc\Exception\LexingException;
 
 /**
  * Class Token
- * @package PhpYacc\Yacc
  */
 class Token
 {
-    public const NAME        = 0x0200;
-    public const NUMBER      = 0x0201;
-    public const COLON       = ':';
-    public const SPACE       = ' ';
-    public const NEWLINE     = '\n';
-    public const MARK        = 0x0100;
-    public const BEGININC    = 0x0101;
-    public const ENDINC      = 0x0102;
-    public const TOKEN       = 0x0103;
-    public const LEFT        = 0x0104;
-    public const RIGHT       = 0x0105;
-    public const NONASSOC    = 0x0106;
-    public const PRECTOK     = 0x0107;
-    public const TYPE        = 0x0108;
-    public const UNION       = 0x0109;
-    public const START       = 0x010a;
-    public const COMMENT     = 0x010b;
-    public const EXPECT      = 0x010c;
-    public const PURE_PARSER = 0x010d;
+    public const EOF         = -1;
+    public const UNKNOW      = 0;
+    public const NAME        = 1;
+    public const NUMBER      = 2;
+    public const COLON       = 3;
+    public const SPACE       = 4;
+    public const NEWLINE     = 5;
+    public const MARK        = 6;
+    public const BEGININC    = 7;
+    public const ENDINC      = 8;
+    public const TOKEN       = 9;
+    public const LEFT        = 10;
+    public const RIGHT       = 11;
+    public const NONASSOC    = 12;
+    public const PRECTOK     = 13;
+    public const TYPE        = 14;
+    public const UNION       = 15;
+    public const START       = 16;
+    public const COMMENT     = 17;
+    public const EXPECT      = 18;
+    public const PURE_PARSER = 19;
+    public const STRING      = 20;
+    public const COMMA       = 21;
+    public const SEMICOLON   = 22;
 
     private const TOKEN_MAP = [
-        self::NAME        => "NAME",
-        self::NUMBER      => "NUMBER",
+        self::NAME        => 'NAME',
+        self::NUMBER      => 'NUMBER',
         self::COLON       => 'COLON',
         self::SPACE       => 'SPACE',
         self::NEWLINE     => 'NEWLINE',
@@ -57,46 +61,102 @@ class Token
         self::COMMENT     => 'COMMENT',
         self::EXPECT      => 'EXPECT',
         self::PURE_PARSER => 'PURE_PARSER',
+        self::EOF         => 'EOF',
+        self::UNKNOW      => 'UNKNOW',
+        self::STRING      => 'STRING',
+        self::COMMA       => 'COMMA',
+        self::SEMICOLON       => 'SEMICOLON',
     ];
-
-    /**
-     * @var string
-     */
-    public $t;
-
-    /**
-     * @var string
-     */
-    public $v;
 
     /**
      * @var int
      */
-    public $ln;
+    protected $type;
 
     /**
      * @var string
      */
-    public $fn;
+    protected $value;
+
+    /**
+     * @var int
+     */
+    protected $line;
+
+    /**
+     * @var string
+     */
+    protected $filename;
 
     /**
      * Token constructor.
-     * @param $token
+     * @param int $type
      * @param string $value
-     * @param int $lineNumber
+     * @param int $line
      * @param string $filename
      * @throws LexingException
      */
-    public function __construct($token, string $value, int $lineNumber, string $filename)
+    public function __construct(int $type, string $value, int $line = 0, string $filename = '')
     {
-        if (! isset(self::TOKEN_MAP[$token]) && ! is_string($token)) {
-            throw new LexingException("Unknown token found: $token");
+        if (! isset(self::TOKEN_MAP[$type])) {
+            throw new LexingException("Unknown token found: $type");
         }
 
-        $this->t = $token;
-        $this->v = $value;
-        $this->ln = $lineNumber;
-        $this->fn = $filename;
+        $this->type     = $type;
+        $this->value    = $value;
+        $this->line     = $line;
+        $this->filename = $filename;
+    }
+
+    /**
+     * @return int
+     */
+    public function getType()
+    {
+        return $this->type;
+    }
+
+    /**
+     * @deprecated
+     * @return int|string
+     */
+    public function getId()
+    {
+        return $this->type;
+    }
+
+    /**
+     * @return string
+     */
+    public function getValue()
+    {
+        return $this->value;
+    }
+
+    /**
+     * @return int
+     */
+    public function getLine()
+    {
+        return $this->line;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFilename()
+    {
+        return $this->filename;
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString(): string
+    {
+        $tag = self::decode($this->type);
+
+        return sprintf("[%s:%d] %s(%s)", $this->filename, $this->line, $tag, $this->value);
     }
 
     /**
@@ -112,11 +172,4 @@ class Token
         return "Token::" . self::TOKEN_MAP[$tag];
     }
 
-    /**
-     * @return string
-     */
-    public function __toString(): string
-    {
-        return sprintf("[%s:%d] %s (%s)", $this->fn, $this->ln, self::decode($this->t), $this->v);
-    }
 }
