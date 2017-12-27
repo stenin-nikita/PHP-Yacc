@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace PhpYacc\Compress;
 
 /**
- * Class TRow
+ * Class TRow.
  */
 class TRow
 {
@@ -36,6 +36,7 @@ class TRow
 
     /**
      * TRow constructor.
+     *
      * @param int $index
      */
     public function __construct(int $index)
@@ -65,9 +66,10 @@ class TRow
     /**
      * @param TRow $a
      * @param TRow $b
+     *
      * @return int
      */
-    public static function compare(TRow $a, TRow $b): int
+    public static function compare(self $a, self $b): int
     {
         if ($a->nent !== $b->nent) {
             return $b->nent - $a->nent;
@@ -75,6 +77,7 @@ class TRow
         if ($a->span() !== $b->span()) {
             return $b->span() - $a->span();
         }
+
         return $a->mini - $b->mini;
     }
 }

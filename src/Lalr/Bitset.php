@@ -10,13 +10,13 @@ declare(strict_types=1);
 namespace PhpYacc\Lalr;
 
 /**
- * Interface Bitset
- * @package PhpYacc\Lalr
+ * Interface Bitset.
  */
 interface Bitset extends \IteratorAggregate
 {
     /**
      * @param int $i
+     *
      * @return bool
      */
     public function testBit(int $i): bool;
@@ -33,7 +33,8 @@ interface Bitset extends \IteratorAggregate
 
     /**
      * @param Bitset $other
+     *
      * @return bool
      */
-    public function or(Bitset $other): bool;
+    public function or(self $other): bool;
 }

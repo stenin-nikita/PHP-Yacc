@@ -10,12 +10,12 @@ declare(strict_types=1);
 namespace PhpYacc\Yacc;
 
 use PhpYacc\Exception\ParseException;
-use PhpYacc\Support\Utils;
 use PhpYacc\Grammar\Context;
 use PhpYacc\Grammar\Symbol;
+use PhpYacc\Support\Utils;
 
 /**
- * Class Parser
+ * Class Parser.
  */
 class Parser
 {
@@ -56,7 +56,8 @@ class Parser
 
     /**
      * Parser constructor.
-     * @param Lexer $lexer
+     *
+     * @param Lexer    $lexer
      * @param MacroSet $macros
      */
     public function __construct(Lexer $lexer, MacroSet $macros)
@@ -66,11 +67,13 @@ class Parser
     }
 
     /**
-     * @param string $code
+     * @param string       $code
      * @param Context|null $context
-     * @return Context
+     *
      * @throws ParseException
      * @throws \PhpYacc\Exception\LexingException
+     *
+     * @return Context
      */
     public function parse(string $code, Context $context = null)
     {
@@ -92,12 +95,14 @@ class Parser
 
     /**
      * @param array $symbols
-     * @param int $n
+     * @param int   $n
      * @param $delm
      * @param array $attribute
-     * @return string
+     *
      * @throws ParseException
      * @throws \PhpYacc\Exception\LexingException
+     *
+     * @return string
      */
     protected function copyAction(array $symbols, int $n, $delm, array $attribute): string
     {
@@ -244,7 +249,7 @@ class Parser
             }
             if (!$action) {
                 if ($i > 1 && $gbuffer[0]->type !== null && $gbuffer[0]->type !== $gbuffer[1]->type) {
-                    throw new ParseException("Stack types are different");
+                    throw new ParseException('Stack types are different');
                 }
             }
             $r = new Production($action, $pos);
@@ -286,11 +291,10 @@ class Parser
      */
     protected function doDeclaration()
     {
-
-        $this->eofToken = $this->context->internSymbol("EOF", true);
+        $this->eofToken = $this->context->internSymbol('EOF', true);
         $this->eofToken->value = 0;
-        $this->errorToken = $this->context->internSymbol("error", true);
-        $this->startPrime = $this->context->internSymbol("\$start", false);
+        $this->errorToken = $this->context->internSymbol('error', true);
+        $this->startPrime = $this->context->internSymbol('$start', false);
 
         while (($token = $this->lexer->getToken())->getType() !== Token::MARK) {
             switch ($token->getType()) {
@@ -333,8 +337,7 @@ class Parser
                     break;
 
                 case Token::EOF:
-                    throw new ParseException("No grammar given");
-
+                    throw new ParseException('No grammar given');
                 default:
                     throw new ParseException("Syntax error, unexpected {$token->getValue()}");
             }
@@ -353,6 +356,7 @@ class Parser
 
     /**
      * @param Token $tag
+     *
      * @throws ParseException
      * @throws \PhpYacc\Exception\LexingException
      */
@@ -395,7 +399,7 @@ class Parser
                 if ($p->value === null) {
                     $p->value = (int) $token->getValue();
                 } else {
-                    throw new ParseException(sprintf("Unexpected Token::NUMBER as %s already has a value", $p->name));
+                    throw new ParseException(sprintf('Unexpected Token::NUMBER as %s already has a value', $p->name));
                 }
                 $token = $this->lexer->getToken();
             }
@@ -410,9 +414,10 @@ class Parser
     }
 
     /**
-     * @return null|Symbol
      * @throws ParseException
      * @throws \PhpYacc\Exception\LexingException
+     *
+     * @return null|Symbol
      */
     protected function getType()
     {
@@ -420,7 +425,8 @@ class Parser
 
         if ($token->getValue()[0] !== '<') {
             $this->lexer->ungetToken();
-            return null;
+
+            return;
         }
 
         $ct = 1;
@@ -431,8 +437,7 @@ class Parser
             switch ($token->getValue()[0]) {
                 case "\n":
                 case "\0":
-                    throw ParseException::unexpected($token, ">");
-
+                    throw ParseException::unexpected($token, '>');
                 case '<':
                     $ct++;
                     break;

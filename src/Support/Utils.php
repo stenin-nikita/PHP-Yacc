@@ -10,12 +10,13 @@ declare(strict_types=1);
 namespace PhpYacc\Support;
 
 /**
- * Class Utils
+ * Class Utils.
  */
 final class Utils
 {
     /**
      * @param string $char
+     *
      * @return bool
      */
     public static function isWhite(string $char): bool
@@ -25,6 +26,7 @@ final class Utils
 
     /**
      * @param string $char
+     *
      * @return bool
      */
     public static function isSymChar(string $char): bool
@@ -34,16 +36,19 @@ final class Utils
 
     /**
      * @param string $char
+     *
      * @return bool
      */
     public static function isOctal(string $char): bool
     {
         $n = \ord($char);
+
         return $n >= 48 && $n <= 55;
     }
 
     /**
      * @param string $string
+     *
      * @return int
      */
     public static function characterValue(string $string): int
@@ -67,6 +72,7 @@ final class Utils
             for ($i = 0; $n < $length && self::isOctal($string[$n]) && $i < 3; $i++) {
                 $value = $value * 8 + $string[$n++];
             }
+
             return $value;
         }
 
@@ -91,7 +97,7 @@ final class Utils
     }
 
     /**
-     * @param array $array
+     * @param array    $array
      * @param callable $cmp
      */
     public static function stableSort(array &$array, callable $cmp)
@@ -107,6 +113,7 @@ final class Utils
             if ($result !== 0) {
                 return $result;
             }
+
             return $a[1] - $b[1];
         });
 

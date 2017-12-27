@@ -16,6 +16,7 @@ function vacant_row(array $array, int $length): bool
             return false;
         }
     }
+
     return true;
 }
 
@@ -26,6 +27,7 @@ function eq_row(array $a, array $b, int $length): bool
             return false;
         }
     }
+
     return true;
 }
 
@@ -34,5 +36,6 @@ function printact(int $act): string
     if (Compress::VACANT === $act) {
         return '  . ';
     }
-    return \sprintf("%4d", $act);
+
+    return \sprintf('%4d', $act);
 }

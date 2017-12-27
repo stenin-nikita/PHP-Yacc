@@ -12,7 +12,7 @@ namespace PhpYacc\Lalr;
 use PhpYacc\Grammar\Symbol;
 
 /**
- * Class Reduce
+ * Class Reduce.
  */
 class Reduce
 {
@@ -28,8 +28,9 @@ class Reduce
 
     /**
      * Reduce constructor.
+     *
      * @param Symbol $symbol
-     * @param int $number
+     * @param int    $number
      */
     public function __construct(Symbol $symbol, int $number)
     {

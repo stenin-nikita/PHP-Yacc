@@ -10,8 +10,7 @@ declare(strict_types=1);
 namespace PhpYacc\Lalr;
 
 /**
- * Class StringBitset
- * @package PhpYacc\Lalr
+ * Class StringBitset.
  */
 class StringBitset implements Bitset
 {
@@ -40,6 +39,7 @@ class StringBitset implements Bitset
 
     /**
      * StringBitset constructor.
+     *
      * @param int $numBits
      */
     public function __construct(int $numBits)
@@ -50,11 +50,13 @@ class StringBitset implements Bitset
 
     /**
      * @param int $i
+     *
      * @return bool
      */
     public function testBit(int $i): bool
     {
         $offset = \intdiv($i, self::NBITS);
+
         return ((\ord($this->str[$offset]) >> ($i % self::NBITS)) & 1) !== 0;
     }
 
@@ -82,11 +84,12 @@ class StringBitset implements Bitset
 
     /**
      * @param Bitset $other
+     *
      * @return bool
      */
     public function or(Bitset $other): bool
     {
-        /** @var StringBitset $other */
+        /* @var StringBitset $other */
         \assert($this->numBits === $other->numBits);
 
         $changed = false;
@@ -97,6 +100,7 @@ class StringBitset implements Bitset
                 $this->str[$offset] = $this->str[$offset] | $other->str[$offset];
             }
         }
+
         return $changed;
     }
 

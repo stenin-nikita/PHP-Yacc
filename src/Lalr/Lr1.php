@@ -12,7 +12,7 @@ namespace PhpYacc\Lalr;
 use PhpYacc\Grammar\Symbol;
 
 /**
- * Class Lr1
+ * Class Lr1.
  */
 class Lr1
 {
@@ -38,9 +38,10 @@ class Lr1
 
     /**
      * Lr1 constructor.
+     *
      * @param Symbol|null $left
-     * @param Bitset $look
-     * @param Item $item
+     * @param Bitset      $look
+     * @param Item        $item
      */
     public function __construct(Symbol $left = null, Bitset $look, Item $item)
     {
@@ -73,9 +74,10 @@ class Lr1
         $result = '';
         $lr1 = $this;
         while ($lr1 !== null) {
-            $result .= $lr1->item . "\n";
+            $result .= $lr1->item."\n";
             $lr1 = $lr1->next;
         }
-        return $result . "\n";
+
+        return $result."\n";
     }
 }

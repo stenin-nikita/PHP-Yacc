@@ -12,16 +12,17 @@ namespace PhpYacc;
 use PhpYacc\Grammar\Context;
 
 /**
- * Interface Macro
+ * Interface Macro.
  */
 interface Macro
 {
     /**
-     * @param Context $ctx
-     * @param array $symbols
+     * @param Context   $ctx
+     * @param array     $symbols
      * @param \Iterator $tokens
-     * @param int $n
-     * @param array $attribute
+     * @param int       $n
+     * @param array     $attribute
+     *
      * @return \Generator
      */
     public function apply(Context $ctx, array $symbols, \Iterator $tokens, int $n, array $attribute): \Generator;

@@ -10,29 +10,31 @@ declare(strict_types=1);
 namespace PhpYacc\Yacc\Macro;
 
 use PhpYacc\Exception\ParseException;
+use PhpYacc\Grammar\Context;
 use PhpYacc\Yacc\MacroAbstract;
 use PhpYacc\Yacc\Token;
-use PhpYacc\Grammar\Context;
 
 /**
- * Class DollarExpansion
+ * Class DollarExpansion.
  */
 class DollarExpansion extends MacroAbstract
 {
-    const SEMVAL_LHS_TYPED   = 1;
+    const SEMVAL_LHS_TYPED = 1;
     const SEMVAL_LHS_UNTYPED = 2;
-    const SEMVAL_RHS_TYPED   = 3;
+    const SEMVAL_RHS_TYPED = 3;
     const SEMVAL_RHS_UNTYPED = 4;
 
     /**
-     * @param Context $ctx
-     * @param array $symbols
+     * @param Context   $ctx
+     * @param array     $symbols
      * @param \Iterator $tokens
-     * @param int $n
-     * @param array $attribute
-     * @return \Generator
+     * @param int       $n
+     * @param array     $attribute
+     *
      * @throws ParseException
      * @throws \PhpYacc\Exception\LogicException
+     *
+     * @return \Generator
      */
     public function apply(Context $ctx, array $symbols, \Iterator $tokens, int $n, array $attribute): \Generator
     {
@@ -95,7 +97,7 @@ class DollarExpansion extends MacroAbstract
 
                     if ($token->getValue()[0] === '$') {
                         $v = 0;
-                    } else if ($token->getValue()[0] === '-') {
+                    } elseif ($token->getValue()[0] === '-') {
                         $token = self::next($tokens);
                         if ($token->getId() !== Token::NUMBER) {
                             throw ParseException::unexpected($token, Token::NUMBER);
@@ -103,11 +105,11 @@ class DollarExpansion extends MacroAbstract
                         $v = -1 * ((int) $token->getValue());
                     } else {
                         if ($token->getId() !== Token::NUMBER) {
-                            throw new \RuntimeException("Number expected");
+                            throw new \RuntimeException('Number expected');
                         }
                         $v = (int) $token->getValue();
                         if ($v > $n) {
-                            throw new \RuntimeException("N is too big");
+                            throw new \RuntimeException('N is too big');
                         }
                     }
 semval:
@@ -115,8 +117,8 @@ semval:
                         $type = $symbols[$v]->type;
                     }
 
-                    if ($type === null /** && $ctx->unioned */ && false) {
-                        throw new ParseException("Type not defined for " . $symbols[$v]->name);
+                    if ($type === null /* && $ctx->unioned */ && false) {
+                        throw new ParseException('Type not defined for '.$symbols[$v]->name);
                     }
 
                     foreach ($this->parseDollar($ctx, $token, $v, $n, $type ? $type->name : null) as $token) {
@@ -131,11 +133,12 @@ semval:
     }
 
     /**
-     * @param Context $ctx
-     * @param Token $t
-     * @param int $nth
-     * @param int $len
+     * @param Context     $ctx
+     * @param Token       $t
+     * @param int         $nth
+     * @param int         $len
      * @param string|null $type
+     *
      * @return array
      */
     protected function parseDollar(Context $ctx, Token $token, int $nth, int $len, string $type = null): array
@@ -175,6 +178,7 @@ semval:
                 $result .= $mp[$i];
             }
         }
+
         return $this->parse($result, $token->getLine(), $token->getFilename());
     }
 }

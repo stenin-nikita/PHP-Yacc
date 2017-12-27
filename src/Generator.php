@@ -19,7 +19,7 @@ use PhpYacc\Yacc\MacroSet;
 use PhpYacc\Yacc\Parser;
 
 /**
- * Class Generator
+ * Class Generator.
  */
 class Generator
 {
@@ -40,26 +40,27 @@ class Generator
 
     /**
      * Generator constructor.
-     * @param Parser|null $parser
-     * @param Lalr|null $lalr
+     *
+     * @param Parser|null   $parser
+     * @param Lalr|null     $lalr
      * @param Compress|null $compressor
      */
     public function __construct(Parser $parser = null, Lalr $lalr = null, Compress $compressor = null)
     {
-        $this->parser = $parser ?: new Parser(new Lexer, new MacroSet);
-        $this->lalr = $lalr ?: new Lalr;
-        $this->compressor = $compressor ?: new Compress;
+        $this->parser = $parser ?: new Parser(new Lexer(), new MacroSet());
+        $this->lalr = $lalr ?: new Lalr();
+        $this->compressor = $compressor ?: new Compress();
     }
 
     /**
      * @param Context $context
-     * @param string $grammar
-     * @param string $template
-     * @param string $resultFile
+     * @param string  $grammar
+     * @param string  $template
+     * @param string  $resultFile
      */
     public function generate(Context $context, string $grammar, string $template, string $resultFile)
     {
-        $template = new Template(new PHP, $template, $context);
+        $template = new Template(new PHP(), $template, $context);
 
         $this->parser->parse($grammar, $context);
 

@@ -23,6 +23,7 @@ function isSameSet(Lr1 $left = null, Lr1 $right = null): bool
         $p = $p->next;
         $t = $t->next;
     }
+
     return $p === null || $p->isHeadItem();
 }
 
@@ -33,5 +34,6 @@ function dumpSet(Context $ctx, Bitset $set): string
         $symbol = $ctx->symbols[$code];
         $result .= "{$symbol->name} ";
     }
+
     return $result;
 }
