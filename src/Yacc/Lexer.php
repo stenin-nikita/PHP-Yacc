@@ -88,6 +88,16 @@ class Lexer
     protected $prevIsDollar;
 
     /**
+     * @var string
+     */
+    protected $char;
+
+    /**
+     * @var string
+     */
+    protected $value;
+
+    /**
      * @param string $code
      * @param string $filename
      */
@@ -169,161 +179,213 @@ class Lexer
             return $this->currentToken;
         }
 
-        $char = $this->getChar();
+        $this->char = $this->getChar();
+        $this->value = '';
 
-        $buffer = '';
+        switch (true) {
+            case $this->isWhitespace():
+                return $this->token(Token::SPACE, $this->value);
+            case $this->isNewline():
+                return $this->token(Token::NEWLINE, $this->value);
+            case $this->isComment():
+                return $this->token(Token::COMMENT, $this->value);
+            case $this->isEof():
+                return $this->token(Token::EOF, $this->value);
+        }
 
-        // Whitespace
-        if (Utils::isWhite($char)) {
-            while (Utils::isWhite($char)) {
-                $buffer .= $char;
-                $char = $this->getChar();
+        $tag = $this->detectToken();
+
+        switch (true) {
+            case isset(self::TAG_MAP[$this->value]):
+                return $this->token(self::TAG_MAP[$this->value], $this->value);
+            case $this->value === ':':
+                return $this->token(Token::COLON, $this->value);
+            case $this->value === ';':
+                return $this->token(Token::SEMICOLON, $this->value);
+            case $this->value === '$':
+                return $this->token(Token::DOLLAR, $this->value);
+            default:
+                return $this->token($tag, $this->value);
+        }
+    }
+
+    /**
+     * @return bool
+     */
+    protected function isWhitespace(): bool
+    {
+        if (Utils::isWhite($this->char)) {
+            while (Utils::isWhite($this->char)) {
+                $this->value .= $this->char;
+                $this->char = $this->getChar();
             }
-            $this->ungetChar($char);
+            $this->ungetChar($this->char);
 
-            return $this->token(Token::SPACE, $buffer);
+            return true;
         }
 
-        // End of line
-        if ($char === "\n") {
-            $this->line++;
+        return false;
+    }
 
-            return $this->token(Token::NEWLINE, $char);
+    /**
+     * @return bool
+     */
+    protected function isNewline(): bool
+    {
+        if ($this->char === "\n") {
+            $this->value = $this->char;
+            return true;
         }
 
-        // Comment
-        if ($char === '/') {
-            if (($char = $this->getChar()) === '*') {
-                $buffer = '/*';
+        return false;
+    }
+
+    /**
+     * @throws ParseException
+     *
+     * @return bool
+     */
+    protected function isComment(): bool
+    {
+        if ($this->char === '/') {
+            if (($this->char = $this->getChar()) === '*') {
+                $this->value = '/*';
 
                 while (true) {
-                    if (($char = $this->getChar()) === '*') {
-                        if (($c = $this->getChar()) === '/') {
+                    if (($this->char = $this->getChar()) === '*') {
+                        if (($this->char = $this->getChar()) === '/') {
                             break;
                         }
-                        $this->ungetChar($char);
+                        $this->ungetChar($this->char);
                     }
 
-                    if ($char === "\0") {
+                    if ($this->char === "\0") {
                         throw ParseException::unexpected($this->token(Token::EOF, "\0"), '*/');
                     }
 
-                    $buffer .= $char;
+                    $this->value .= $this->char;
                 }
 
-                $buffer .= '*/';
+                $this->value .= '*/';
 
-                return $this->token(Token::COMMENT, $buffer);
-            } elseif ($char === '/') {
-                $buffer = '//';
+                return true;
+            } elseif ($this->char === '/') {
+                $this->value = '//';
 
                 do {
-                    $char = $this->getChar();
-                    if ($char !== "\0") {
-                        $buffer .= $char;
+                    $this->char = $this->getChar();
+                    if ($this->char !== "\0") {
+                        $this->value .= $this->char;
                     }
-                } while ($char !== "\n" && $char !== "\0");
+                } while ($this->char !== "\n" && $this->char !== "\0");
 
-                return $this->token(Token::COMMENT, $buffer);
+                return true;
             }
 
-            $this->ungetChar($char);
-            $char = '/';
+            $this->ungetChar($this->char);
+            $this->char = '/';
         }
 
-        // End of file
-        if ($char === "\0") {
-            return $this->token(Token::EOF, "\0");
+        return false;
+    }
+
+    /**
+     * @return bool
+     */
+    protected function isEof(): bool
+    {
+        if ($this->char === "\0") {
+            $this->value = $this->char;
+            return true;
         }
 
+        return false;
+    }
+
+    /**
+     * @throws ParseException
+     *
+     * @return int
+     */
+    protected function detectToken()
+    {
         $tag = Token::UNKNOW;
 
-        if ($char === '%') {
-            $char = $this->getChar();
-            if ($char === '%' || $char === '{' | $char === '}' || Utils::isSymChar($char)) {
-                $buffer .= '%';
+        if ($this->char === '%') {
+            $this->char = $this->getChar();
+            if ($this->char === '%' || $this->char === '{' | $this->char === '}' || Utils::isSymChar($this->char)) {
+                $this->value .= '%';
             } else {
-                $this->ungetChar($char);
-                $char = '%';
+                $this->ungetChar($this->char);
+                $this->char = '%';
             }
         }
 
-        if ($char === '$') {
+        if ($this->char === '$') {
             if (!$this->prevIsDollar) {
-                $buffer .= '$';
-                $char = $this->getChar();
+                $this->value .= '$';
+                $this->char = $this->getChar();
 
-                if ($char === '$') {
-                    $this->ungetChar($char);
+                if ($this->char === '$') {
+                    $this->ungetChar($this->char);
                     $this->prevIsDollar = true;
-                } elseif (!\ctype_digit($char) && Utils::isSymChar($char)) {
+                } elseif (!\ctype_digit($this->char) && Utils::isSymChar($this->char)) {
                     do {
-                        $buffer .= $char;
-                        $char = $this->getChar();
-                    } while (Utils::isSymChar($char));
-                    $this->ungetChar($char);
+                        $this->value .= $this->char;
+                        $this->char = $this->getChar();
+                    } while (Utils::isSymChar($this->char));
+                    $this->ungetChar($this->char);
                     $tag = Token::NAME;
                 } else {
-                    $this->ungetChar($char);
+                    $this->ungetChar($this->char);
                 }
             } else {
-                $buffer .= '$';
+                $this->value .= '$';
                 $this->prevIsDollar = false;
             }
-        } elseif (Utils::isSymChar($char)) {
+        } elseif (Utils::isSymChar($this->char)) {
             do {
-                $buffer .= $char;
-                $char = $this->getChar();
-            } while ($char !== "\0" && Utils::isSymChar($char));
+                $this->value .= $this->char;
+                $this->char = $this->getChar();
+            } while ($this->char !== "\0" && Utils::isSymChar($this->char));
 
-            $this->ungetChar($char);
-            $tag = \ctype_digit($buffer) ? Token::NUMBER : Token::NAME;
-        } elseif ($char === '\'' || $char === '"') {
-            $quote = $char;
-            $buffer .= $char;
+            $this->ungetChar($this->char);
+            $tag = \ctype_digit($this->value) ? Token::NUMBER : Token::NAME;
+        } elseif ($this->char === '\'' || $this->char === '"') {
+            $quote = $this->char;
+            $this->value .= $this->char;
 
-            while (($char = $this->getChar()) !== $quote) {
-                if ($char === "\0") {
+            while (($this->char = $this->getChar()) !== $quote) {
+                if ($this->char === "\0") {
                     throw ParseException::unexpected($this->token(Token::EOF, "\0"), $quote);
                 }
 
-                if ($char === "\n") {
+                if ($this->char === "\n") {
                     throw ParseException::unexpected($this->token(Token::NEWLINE, "\n"), $quote);
                 }
 
-                $buffer .= $char;
-                if ($char === '\\') {
-                    $char = $this->getChar();
+                $this->value .= $this->char;
+                if ($this->char === '\\') {
+                    $this->char = $this->getChar();
 
-                    if ($char === "\0") {
+                    if ($this->char === "\0") {
                         break;
                     }
 
-                    if ($char === "\n") {
+                    if ($this->char === "\n") {
                         continue;
                     }
 
-                    $buffer .= $char;
+                    $this->value .= $this->char;
                 }
             }
-            $buffer .= $char;
+            $this->value .= $this->char;
             $tag = Token::STRING;
         } else {
-            $buffer .= $char;
+            $this->value .= $this->char;
         }
 
-        if (isset(self::TAG_MAP[$buffer])) {
-            return $this->token(self::TAG_MAP[$buffer], $buffer);
-        }
-
-        if ($buffer === ':') {
-            return $this->token(Token::COLON, $buffer);
-        }
-        if ($buffer === ';') {
-            return $this->token(Token::SEMICOLON, $buffer);
-        }
-
-        return $this->token($tag, $buffer);
+        return $tag;
     }
 
     /**
@@ -342,7 +404,13 @@ class Lexer
             return "\0";
         }
 
-        return $this->buffer[$this->offset++];
+        $char = $this->buffer[$this->offset++];
+
+        if ($char === "\n") {
+            $this->line++;
+        }
+
+        return $char;
     }
 
     /**

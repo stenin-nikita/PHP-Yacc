@@ -71,15 +71,12 @@ class DollarExpansion extends MacroAbstract
                     }
 
                     if ($v >= 0) {
-                        $token = new Token($v === 0 ? '$' : 0, $token->getValue(), $token->getLine(), $token->getFilename());
+                        $token = new Token($v === 0 ? Token::DOLLAR : 0, $token->getValue(), $token->getLine(), $token->getFilename());
                         goto semval;
                     }
                     break;
 
-                case Token::UNKNOW:
-                    if ($token->getValue() !== '$') {
-                        break;
-                    }
+                case Token::DOLLAR:
                     $type = null;
                     $token = self::next($tokens);
                     if ($token->getId() === '<') {
@@ -95,7 +92,7 @@ class DollarExpansion extends MacroAbstract
                         $token = self::next($tokens);
                     }
 
-                    if ($token->getValue()[0] === '$') {
+                    if ($token->getType() === Token::DOLLAR) {
                         $v = 0;
                     } elseif ($token->getValue()[0] === '-') {
                         $token = self::next($tokens);
@@ -134,7 +131,7 @@ semval:
 
     /**
      * @param Context     $ctx
-     * @param Token       $t
+     * @param Token       $token
      * @param int         $nth
      * @param int         $len
      * @param string|null $type

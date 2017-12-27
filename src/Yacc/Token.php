@@ -40,6 +40,7 @@ class Token
     public const STRING = 20;
     public const COMMA = 21;
     public const SEMICOLON = 22;
+    public const DOLLAR = 23;
 
     private const TOKEN_MAP = [
         self::NAME            => 'NAME',
@@ -66,6 +67,7 @@ class Token
         self::STRING          => 'STRING',
         self::COMMA           => 'COMMA',
         self::SEMICOLON       => 'SEMICOLON',
+        self::DOLLAR          => 'DOLLAR',
     ];
 
     /**

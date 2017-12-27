@@ -222,12 +222,12 @@ class Parser
                     $action = $this->copyAction($gbuffer, $i - 1, '}', $attribute);
                 } elseif ($token->getType() === Token::PRECTOK) {
                     $lastTerm = $this->context->internSymbol($this->lexer->getToken()->getValue(), false);
-                } elseif ($token->getType() === Token::NAME && $this->lexer->peek()->getValue()[0] === ':') {
+                } elseif ($token->getType() === Token::NAME && $this->lexer->peek()->getType() === Token::COLON) {
                     break;
                 } elseif ($token->getType() === Token::NAME && $this->lexer->peek()->getValue()[0] === '@') {
                     $attribute[$i] = $token->getValue();
                     $this->lexer->getToken();
-                } elseif ($token->getType() === Token::NAME || $token->getValue()[0] === "'") {
+                } elseif ($token->getType() === Token::NAME || $token->getType() === Token::STRING) {
                     if ($action) {
                         $g = $this->context->genNonTerminal();
                         $r = new Production($action, $pos);
