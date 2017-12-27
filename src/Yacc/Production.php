@@ -12,7 +12,7 @@ namespace PhpYacc\Yacc;
 use PhpYacc\Grammar\Symbol;
 
 /**
- * Class Production
+ * Class Production.
  */
 class Production
 {
@@ -55,8 +55,9 @@ class Production
 
     /**
      * Production constructor.
+     *
      * @param string|null $action
-     * @param int $position
+     * @param int         $position
      */
     public function __construct(string $action = null, int $position)
     {

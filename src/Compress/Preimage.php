@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace PhpYacc\Compress;
 
 /**
- * Class Preimage
+ * Class Preimage.
  */
 class Preimage
 {
@@ -31,6 +31,7 @@ class Preimage
 
     /**
      * Preimage constructor.
+     *
      * @param int $index
      */
     public function __construct(int $index)
@@ -41,9 +42,10 @@ class Preimage
     /**
      * @param Preimage $x
      * @param Preimage $y
+     *
      * @return int
      */
-    public static function compare(Preimage $x, Preimage $y): int
+    public static function compare(self $x, self $y): int
     {
         if ($x->length !== $y->length) {
             return $x->length - $y->length;
@@ -53,6 +55,7 @@ class Preimage
                 return $value - $y->classes[$key];
             }
         }
+
         return 0;
     }
 }

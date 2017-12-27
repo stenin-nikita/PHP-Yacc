@@ -14,12 +14,12 @@ use PhpYacc\Exception\ParseException;
 use PhpYacc\Support\Utils;
 
 /**
- * Class Lexer
+ * Class Lexer.
  */
 class Lexer
 {
     /**
-     * Whitespace tokens
+     * Whitespace tokens.
      */
     private const SPACE_TOKENS = [
         Token::SPACE,
@@ -28,23 +28,23 @@ class Lexer
     ];
 
     /**
-     * Tag map
+     * Tag map.
      */
     private const TAG_MAP = [
-        "%%"            => Token::MARK,
-        "%{"            => Token::BEGININC,
-        "%}"            => Token::ENDINC,
-        "%token"        => Token::TOKEN,
-        "%term"         => Token::TOKEN,
-        "%left"         => Token::LEFT,
-        "%right"        => Token::RIGHT,
-        "%nonassoc"     => Token::NONASSOC,
-        "%prec"         => Token::PRECTOK,
-        "%type"         => Token::TYPE,
-        "%union"        => Token::UNION,
-        "%start"        => Token::START,
-        "%expect"       => Token::EXPECT,
-        "%pure_parser"  => Token::PURE_PARSER,
+        '%%'            => Token::MARK,
+        '%{'            => Token::BEGININC,
+        '%}'            => Token::ENDINC,
+        '%token'        => Token::TOKEN,
+        '%term'         => Token::TOKEN,
+        '%left'         => Token::LEFT,
+        '%right'        => Token::RIGHT,
+        '%nonassoc'     => Token::NONASSOC,
+        '%prec'         => Token::PRECTOK,
+        '%type'         => Token::TYPE,
+        '%union'        => Token::UNION,
+        '%start'        => Token::START,
+        '%expect'       => Token::EXPECT,
+        '%pure_parser'  => Token::PURE_PARSER,
     ];
 
     /**
@@ -93,7 +93,7 @@ class Lexer
      */
     public function startLexing(string $code, string $filename = '')
     {
-        $this->buffer   = $code;
+        $this->buffer = $code;
         $this->filename = $filename;
 
         $this->reset();
@@ -104,17 +104,18 @@ class Lexer
      */
     protected function reset()
     {
-        $this->line         = 1;
-        $this->offset       = 0;
-        $this->backChar     = null;
-        $this->backToken    = null;
+        $this->line = 1;
+        $this->offset = 0;
+        $this->backChar = null;
+        $this->backToken = null;
         $this->prevIsDollar = false;
     }
 
     /**
-     * @return Token
      * @throws LexingException
      * @throws ParseException
+     *
+     * @return Token
      */
     public function getToken(): Token
     {
@@ -133,16 +134,17 @@ class Lexer
     public function ungetToken()
     {
         if ($this->backToken !== null) {
-            throw new LexingException("Too many ungetToken calls");
+            throw new LexingException('Too many ungetToken calls');
         }
 
         $this->backToken = $this->currentToken;
     }
 
     /**
-     * @return Token
      * @throws LexingException
      * @throws ParseException
+     *
+     * @return Token
      */
     public function peek(): Token
     {
@@ -153,9 +155,10 @@ class Lexer
     }
 
     /**
-     * @return Token
      * @throws LexingException
      * @throws ParseException
+     *
+     * @return Token
      */
     public function getRawToken()
     {
@@ -168,14 +171,13 @@ class Lexer
 
         $char = $this->getChar();
 
-        $buffer = "";
+        $buffer = '';
 
         // Whitespace
         if (Utils::isWhite($char)) {
             while (Utils::isWhite($char)) {
                 $buffer .= $char;
                 $char = $this->getChar();
-
             }
             $this->ungetChar($char);
 
@@ -239,7 +241,7 @@ class Lexer
         if ($char === '%') {
             $char = $this->getChar();
             if ($char === '%' || $char === '{' | $char === '}' || Utils::isSymChar($char)) {
-                $buffer .= "%";
+                $buffer .= '%';
             } else {
                 $this->ungetChar($char);
                 $char = '%';
@@ -247,14 +249,14 @@ class Lexer
         }
 
         if ($char === '$') {
-            if (! $this->prevIsDollar) {
+            if (!$this->prevIsDollar) {
                 $buffer .= '$';
                 $char = $this->getChar();
 
                 if ($char === '$') {
                     $this->ungetChar($char);
                     $this->prevIsDollar = true;
-                } elseif (! \ctype_digit($char) && Utils::isSymChar($char)) {
+                } elseif (!\ctype_digit($char) && Utils::isSymChar($char)) {
                     do {
                         $buffer .= $char;
                         $char = $this->getChar();
@@ -345,6 +347,7 @@ class Lexer
 
     /**
      * @param string $char
+     *
      * @throws LexingException
      */
     protected function ungetChar(string $char)
@@ -354,15 +357,16 @@ class Lexer
         }
 
         if ($this->backChar !== null) {
-            throw new LexingException("To many ungetChar calls");
+            throw new LexingException('To many ungetChar calls');
         }
 
         $this->backChar = $char;
     }
 
     /**
-     * @param int $type
+     * @param int    $type
      * @param string $value
+     *
      * @return Token
      */
     protected function token(int $type, string $value): Token

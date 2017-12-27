@@ -13,7 +13,7 @@ use PhpYacc\Grammar\Context;
 use PhpYacc\Yacc\Macro\DollarExpansion;
 
 /**
- * Class MacroSet
+ * Class MacroSet.
  */
 class MacroSet
 {
@@ -24,6 +24,7 @@ class MacroSet
 
     /**
      * MacroSet constructor.
+     *
      * @param MacroAbstract[] ...$macros
      */
     public function __construct(MacroAbstract ...$macros)
@@ -44,10 +45,11 @@ class MacroSet
 
     /**
      * @param Context $ctx
-     * @param array $symbols
-     * @param array $tokens
-     * @param int $n
-     * @param array $attribute
+     * @param array   $symbols
+     * @param array   $tokens
+     * @param int     $n
+     * @param array   $attribute
+     *
      * @return array
      */
     public function apply(Context $ctx, array $symbols, array $tokens, int $n, array $attribute): array
@@ -71,6 +73,7 @@ class MacroSet
 
     /**
      * @param \Traversable $t
+     *
      * @return \Traversable
      */
     public static function cache(\Traversable $t): \Traversable

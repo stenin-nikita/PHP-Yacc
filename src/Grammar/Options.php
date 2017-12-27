@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace PhpYacc\Grammar;
 
 /**
- * Class Options
+ * Class Options.
  */
 class Options
 {

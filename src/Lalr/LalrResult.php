@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace PhpYacc\Lalr;
 
 /**
- * Class LalrResult
+ * Class LalrResult.
  */
 class LalrResult
 {
@@ -41,9 +41,10 @@ class LalrResult
 
     /**
      * LalrResult constructor.
-     * @param array $grams
-     * @param array $states
-     * @param int $nnonleafstates
+     *
+     * @param array  $grams
+     * @param array  $states
+     * @param int    $nnonleafstates
      * @param string $output
      */
     public function __construct(array $grams, array $states, int $nnonleafstates, string $output)

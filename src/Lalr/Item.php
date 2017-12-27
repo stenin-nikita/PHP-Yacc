@@ -26,8 +26,9 @@ class Item implements \ArrayAccess, \IteratorAggregate
 
     /**
      * Item constructor.
+     *
      * @param Production $production
-     * @param int $offset
+     * @param int        $offset
      */
     public function __construct(Production $production, int $offset)
     {
@@ -49,15 +50,17 @@ class Item implements \ArrayAccess, \IteratorAggregate
 
     /**
      * @param int $n
+     *
      * @return Item
      */
-    public function slice(int $n): Item
+    public function slice(int $n): self
     {
-        return new Item($this->production, $this->pos + $n);
+        return new self($this->production, $this->pos + $n);
     }
 
     /**
      * @param mixed $index
+     *
      * @return bool
      */
     public function offsetExists($index)
@@ -67,25 +70,29 @@ class Item implements \ArrayAccess, \IteratorAggregate
 
     /**
      * @param mixed $index
-     * @return \PhpYacc\Grammar\Symbol
+     *
      * @throws LogicException
+     *
+     * @return \PhpYacc\Grammar\Symbol
      */
     public function offsetGet($index)
     {
         if (!$this->offsetExists($index)) {
             throw new \LogicException("Offset $index does not exist");
         }
+
         return $this->production->body[$index + $this->pos];
     }
 
     /**
      * @param mixed $index
      * @param mixed $value
+     *
      * @throws LogicException
      */
     public function offsetSet($index, $value)
     {
-        throw new \LogicException("Not supported");
+        throw new \LogicException('Not supported');
     }
 
     /**
@@ -93,7 +100,7 @@ class Item implements \ArrayAccess, \IteratorAggregate
      */
     public function offsetUnset($index)
     {
-        throw new \LogicException("Not supported");
+        throw new \LogicException('Not supported');
     }
 
     /**
@@ -133,25 +140,25 @@ class Item implements \ArrayAccess, \IteratorAggregate
      */
     public function __toString()
     {
-        $result = "(" . $this->production->num . ")";
+        $result = '('.$this->production->num.')';
         for ($i = 0; $i < \count($this->production->body); $i++) {
             if ($i === 1) {
-                $result .= " :";
+                $result .= ' :';
             }
 
             if ($i === $this->pos) {
-                $result .= " .";
+                $result .= ' .';
             }
 
-            $result .= " " . $this->production->body[$i]->name;
+            $result .= ' '.$this->production->body[$i]->name;
         }
 
         if ($i === 1) {
-            $result .= " :";
+            $result .= ' :';
         }
 
         if ($i === $this->pos) {
-            $result .= " .";
+            $result .= ' .';
         }
 
         return $result;

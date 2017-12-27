@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace PhpYacc\Exception;
 
 /**
- * Class TemplateException
+ * Class TemplateException.
  */
 class TemplateException extends PhpYaccException
 {

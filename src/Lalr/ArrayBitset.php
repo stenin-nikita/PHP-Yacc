@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace PhpYacc\Lalr;
 
 /**
- * Class ArrayBitset
+ * Class ArrayBitset.
  */
 class ArrayBitset implements Bitset
 {
@@ -28,6 +28,7 @@ class ArrayBitset implements Bitset
 
     /**
      * ArrayBitset constructor.
+     *
      * @param int $numBits
      */
     public function __construct(int $numBits)
@@ -46,6 +47,7 @@ class ArrayBitset implements Bitset
 
     /**
      * @param int $i
+     *
      * @return bool
      */
     public function testBit(int $i): bool
@@ -71,11 +73,12 @@ class ArrayBitset implements Bitset
 
     /**
      * @param Bitset $other
+     *
      * @return bool
      */
     public function or(Bitset $other): bool
     {
-        /** @var $other ArrayBitset */
+        /* @var $other ArrayBitset */
         assert($this->numBits === $other->numBits);
 
         $changed = false;
@@ -83,6 +86,7 @@ class ArrayBitset implements Bitset
             $this->array[$key] = $value | $other->array[$key];
             $changed = $changed || $value !== $this->array[$key];
         }
+
         return $changed;
     }
 
