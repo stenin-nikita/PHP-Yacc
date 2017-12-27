@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace PhpYacc\Compress;
 
 /**
- * Class Auxiliary
+ * Class Auxiliary.
  */
 class Auxiliary
 {

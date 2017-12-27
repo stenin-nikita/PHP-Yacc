@@ -9,12 +9,12 @@ declare(strict_types=1);
 
 namespace PhpYacc\Grammar;
 
-use PhpYacc\Lalr\Lr1;
 use PhpYacc\Lalr\Conflict;
+use PhpYacc\Lalr\Lr1;
 use PhpYacc\Lalr\Reduce;
 
 /**
- * Class State
+ * Class State.
  */
 class State
 {
@@ -50,8 +50,9 @@ class State
 
     /**
      * State constructor.
+     *
      * @param Symbol $through
-     * @param Lr1 $items
+     * @param Lr1    $items
      */
     public function __construct(Symbol $through, Lr1 $items)
     {

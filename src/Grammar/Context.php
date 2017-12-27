@@ -11,11 +11,11 @@ namespace PhpYacc\Grammar;
 
 use PhpYacc\Exception\LogicException;
 use PhpYacc\Support\Utils;
-use PhpYacc\Yacc\Production;
 use PhpYacc\Yacc\Macro\DollarExpansion;
+use PhpYacc\Yacc\Production;
 
 /**
- * Class Context
+ * Class Context.
  */
 class Context
 {
@@ -217,7 +217,8 @@ class Context
 
     /**
      * Context constructor.
-     * @param string $filename
+     *
+     * @param string        $filename
      * @param resource|null $debugFile
      */
     public function __construct(string $filename = 'YY', resource $debugFile = null)
@@ -238,8 +239,10 @@ class Context
 
     /**
      * @param $name
-     * @return \Generator
+     *
      * @throws LogicException
+     *
+     * @return \Generator
      */
     public function __get($name)
     {
@@ -247,10 +250,11 @@ class Context
             case 'terminals': return $this->terminals();
             case 'nonterminals': return $this->nonTerminals();
         }
-        if (!isset($this->{'_' . $name})) {
+        if (!isset($this->{'_'.$name})) {
             throw new LogicException("Should never happen: unknown property $name");
         }
-        return $this->{'_' . $name};
+
+        return $this->{'_'.$name};
     }
 
     /**
@@ -259,7 +263,7 @@ class Context
      */
     public function __set($name, $value)
     {
-        $this->{'set' . $name}($value);
+        $this->{'set'.$name}($value);
     }
 
     /**
@@ -293,8 +297,9 @@ class Context
     public function nilSymbol(): Symbol
     {
         if ($this->_nilsymbol === null) {
-            $this->_nilsymbol = $this->intern("@nil");
+            $this->_nilsymbol = $this->intern('@nil');
         }
+
         return $this->_nilsymbol;
     }
 
@@ -339,19 +344,21 @@ class Context
      */
     public function genNonTerminal(): Symbol
     {
-        $buffer = \sprintf("@%d", $this->nnonterminals);
+        $buffer = \sprintf('@%d', $this->nnonterminals);
+
         return $this->internSymbol($buffer, false);
     }
 
     /**
      * @param string $s
-     * @param bool $isTerm
+     * @param bool   $isTerm
+     *
      * @return Symbol
      */
     public function internSymbol(string $s, bool $isTerm): Symbol
     {
         $p = $this->intern($s);
-        
+
         if (!$p->isNilSymbol()) {
             return $p;
         }
@@ -375,6 +382,7 @@ class Context
 
     /**
      * @param string $s
+     *
      * @return Symbol
      */
     public function intern(string $s): Symbol
@@ -383,11 +391,13 @@ class Context
             return $this->symbolHash[$s];
         }
         $p = new Symbol($this->nsymbols++, $s);
+
         return $this->addSymbol($p);
     }
 
     /**
      * @param Symbol $symbol
+     *
      * @return Symbol
      */
     public function addSymbol(Symbol $symbol): Symbol
@@ -404,6 +414,7 @@ class Context
                 $this->nnonterminals++;
             }
         }
+
         return $symbol;
     }
 
@@ -417,6 +428,7 @@ class Context
 
     /**
      * @param int $code
+     *
      * @return Symbol
      */
     public function symbol(int $code): Symbol
@@ -432,22 +444,26 @@ class Context
 
     /**
      * @param Production $p
+     *
      * @return Production
      */
     public function addGram(Production $p)
     {
         $p->num = $this->ngrams++;
         $this->_grams[] = $p;
+
         return $p;
     }
 
     /**
      * @param int $i
+     *
      * @return Production
      */
     public function gram(int $i): Production
     {
         assert($i < $this->ngrams);
+
         return $this->_grams[$i];
     }
 

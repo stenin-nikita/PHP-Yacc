@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace PhpYacc\Exception;
 
 /**
- * Class PhpYaccException
+ * Class PhpYaccException.
  */
 class PhpYaccException extends \Exception
 {

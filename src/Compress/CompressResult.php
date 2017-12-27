@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace PhpYacc\Compress;
 
 /**
- * Class CompressResult
+ * Class CompressResult.
  */
 class CompressResult
 {

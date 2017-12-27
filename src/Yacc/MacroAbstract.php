@@ -14,14 +14,15 @@ use PhpYacc\Macro;
 use PhpYacc\Support\Utils;
 
 /**
- * Class MacroAbstract
+ * Class MacroAbstract.
  */
 abstract class MacroAbstract implements Macro
 {
     /**
      * @param string $string
-     * @param int $lineNumber
+     * @param int    $lineNumber
      * @param string $filename
+     *
      * @return array
      */
     protected function parse(string $string, int $lineNumber, string $filename): array
@@ -50,15 +51,17 @@ abstract class MacroAbstract implements Macro
 
     /**
      * @param \Iterator $it
-     * @return Token
+     *
      * @throws LogicException
+     *
+     * @return Token
      */
     protected static function next(\Iterator $it): Token
     {
         $it->next();
 
         if (!$it->valid()) {
-            throw new LogicException("Unexpected end of action stream: this should never happen");
+            throw new LogicException('Unexpected end of action stream: this should never happen');
         }
 
         return $it->current();

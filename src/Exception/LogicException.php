@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace PhpYacc\Exception;
 
 /**
- * Class LogicException
+ * Class LogicException.
  */
 class LogicException extends PhpYaccException
 {

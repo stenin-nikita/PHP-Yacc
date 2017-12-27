@@ -14,7 +14,7 @@ use PhpYacc\Grammar\Symbol;
 use PhpYacc\Lalr\Conflict;
 
 /**
- * Class ShiftReduce
+ * Class ShiftReduce.
  */
 class ShiftReduce extends Conflict
 {
@@ -30,9 +30,10 @@ class ShiftReduce extends Conflict
 
     /**
      * ShiftReduce constructor.
-     * @param State $state
-     * @param int $reduce
-     * @param Symbol $symbol
+     *
+     * @param State         $state
+     * @param int           $reduce
+     * @param Symbol        $symbol
      * @param Conflict|null $next
      */
     public function __construct(State $state, int $reduce, Symbol $symbol, Conflict $next = null)

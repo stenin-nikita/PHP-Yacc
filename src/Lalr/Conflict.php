@@ -12,7 +12,7 @@ namespace PhpYacc\Lalr;
 use PhpYacc\Grammar\Symbol;
 
 /**
- * Class Conflict
+ * Class Conflict.
  */
 abstract class Conflict
 {
@@ -28,10 +28,11 @@ abstract class Conflict
 
     /**
      * Conflict constructor.
-     * @param Symbol $symbol
+     *
+     * @param Symbol        $symbol
      * @param Conflict|null $next
      */
-    protected function __construct(Symbol $symbol, Conflict $next = null)
+    protected function __construct(Symbol $symbol, self $next = null)
     {
         $this->next = $next;
         $this->symbol = $symbol;
@@ -72,7 +73,7 @@ abstract class Conflict
     /**
      * @param Conflict|null $next
      */
-    public function setNext(Conflict $next = null)
+    public function setNext(self $next = null)
     {
         $this->next = $next;
     }

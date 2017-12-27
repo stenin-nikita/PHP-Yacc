@@ -13,7 +13,7 @@ use PhpYacc\Exception\LogicException;
 use PhpYacc\Yacc\Production;
 
 /**
- * Class Symbol
+ * Class Symbol.
  */
 class Symbol
 {
@@ -72,16 +72,18 @@ class Symbol
 
     /**
      * Symbol constructor.
-     * @param int $code
-     * @param string $name
-     * @param null $value
-     * @param int $terminal
-     * @param int $precedence
-     * @param int $associativity
+     *
+     * @param int         $code
+     * @param string      $name
+     * @param null        $value
+     * @param int         $terminal
+     * @param int         $precedence
+     * @param int         $associativity
      * @param Symbol|null $type
+     *
      * @throws LogicException
      */
-    public function __construct(int $code, string $name, $value = null, int $terminal = self::UNDEF, int $precedence = self::UNDEF, int $associativity = self::UNDEF, Symbol $type = null)
+    public function __construct(int $code, string $name, $value = null, int $terminal = self::UNDEF, int $precedence = self::UNDEF, int $associativity = self::UNDEF, self $type = null)
     {
         $this->code = $code;
         $this->_name = $name;
@@ -102,6 +104,7 @@ class Symbol
 
     /**
      * @param $name
+     *
      * @return mixed
      */
     public function __get($name)
@@ -115,11 +118,12 @@ class Symbol
      */
     public function __set($name, $value)
     {
-        $this->{'set' . $name}($value);
+        $this->{'set'.$name}($value);
     }
 
     /**
      * @param int $terminal
+     *
      * @throws LogicException
      */
     public function setTerminal(int $terminal)
@@ -156,14 +160,15 @@ class Symbol
 
     /**
      * @param $value
+     *
      * @throws LogicException
      */
     public function setValue($value)
     {
         if ($this->isterminal && !is_int($value)) {
-            throw new LogicException("Terminals value must be an integer, " . \gettype($value) . " provided");
-        } elseif ($this->isnonterminal  && !($value instanceof Production || $value === null)) {
-            throw new LogicException("NonTerminals value must be a production, " . \gettype($value) . " provided");
+            throw new LogicException('Terminals value must be an integer, '.\gettype($value).' provided');
+        } elseif ($this->isnonterminal && !($value instanceof Production || $value === null)) {
+            throw new LogicException('NonTerminals value must be a production, '.\gettype($value).' provided');
         }
         $this->_value = $value;
     }
@@ -171,7 +176,7 @@ class Symbol
     /**
      * @param Symbol|null $type
      */
-    public function setType(Symbol $type = null)
+    public function setType(self $type = null)
     {
         $this->_type = $type;
     }

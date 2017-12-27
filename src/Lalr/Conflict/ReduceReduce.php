@@ -13,7 +13,7 @@ use PhpYacc\Grammar\Symbol;
 use PhpYacc\Lalr\Conflict;
 
 /**
- * Class ReduceReduce
+ * Class ReduceReduce.
  */
 class ReduceReduce extends Conflict
 {
@@ -29,9 +29,10 @@ class ReduceReduce extends Conflict
 
     /**
      * ReduceReduce constructor.
-     * @param int $reduce1
-     * @param int $reduce2
-     * @param Symbol $symbol
+     *
+     * @param int           $reduce1
+     * @param int           $reduce2
+     * @param Symbol        $symbol
      * @param Conflict|null $next
      */
     public function __construct(int $reduce1, int $reduce2, Symbol $symbol, Conflict $next = null)

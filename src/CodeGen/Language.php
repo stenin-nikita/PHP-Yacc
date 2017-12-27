@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace PhpYacc\CodeGen;
 
 /**
- * Interface Language
+ * Interface Language.
  */
 interface Language
 {
@@ -27,7 +27,7 @@ interface Language
 
     /**
      * @param string $text
-     * @param bool $includeHeader
+     * @param bool   $includeHeader
      */
     public function write(string $text, bool $includeHeader = false);
 
@@ -48,7 +48,7 @@ interface Language
 
     /**
      * @param string $indent
-     * @param int $num
+     * @param int    $num
      * @param string $value
      */
     public function case_block(string $indent, int $num, string $value);

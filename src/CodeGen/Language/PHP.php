@@ -12,7 +12,7 @@ namespace PhpYacc\CodeGen\Language;
 use PhpYacc\CodeGen\Language;
 
 /**
- * Class PHP
+ * Class PHP.
  */
 class PHP implements Language
 {
@@ -65,7 +65,7 @@ class PHP implements Language
      */
     public function inline_comment(string $text)
     {
-        $this->fileBuffer .= '/* ' . $text . " */";
+        $this->fileBuffer .= '/* '.$text.' */';
     }
 
     /**
@@ -73,12 +73,12 @@ class PHP implements Language
      */
     public function comment(string $text)
     {
-        $this->fileBuffer .= '//' . $text . "\n";
+        $this->fileBuffer .= '//'.$text."\n";
     }
 
     /**
      * @param string $indent
-     * @param int $num
+     * @param int    $num
      * @param string $value
      */
     public function case_block(string $indent, int $num, string $value)
@@ -88,7 +88,7 @@ class PHP implements Language
 
     /**
      * @param string $text
-     * @param bool $includeHeader
+     * @param bool   $includeHeader
      */
     public function write(string $text, bool $includeHeader = false)
     {
@@ -104,7 +104,7 @@ class PHP implements Language
     public function writeQuoted(string $text)
     {
         $regex = '(\\$(?=[a-zA-Z_])|")';
-        $text = \preg_replace($regex, "\\\\$0", $text);
+        $text = \preg_replace($regex, '\\\$0', $text);
         $this->fileBuffer .= $text;
     }
 }
