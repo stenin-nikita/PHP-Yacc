@@ -103,8 +103,17 @@ class PHP implements Language
      */
     public function writeQuoted(string $text)
     {
-        $regex = '(\\$(?=[a-zA-Z_])|")';
-        $text = \preg_replace($regex, '\\\$0', $text);
-        $this->fileBuffer .= $text;
+        $buf = [];
+        for($i = 0; $i < \mb_strlen($text); $i++) {
+            $char = $text[$i];
+
+            if ($char == '\\' || $char == '"' || $char == '$') {
+                $buf[] = '\\';
+            }
+
+            $buf[] = $char;
+        }
+
+        $this->fileBuffer .= implode('', $buf);
     }
 }

@@ -280,7 +280,6 @@ class Template
      */
     protected function skipif(string $spec): bool
     {
-        dump($spec);
         [ $dump, $test ] = \explode(' ', $spec, 2);
         $test = \trim($test);
         switch ($test) {
