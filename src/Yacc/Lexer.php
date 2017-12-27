@@ -234,6 +234,7 @@ class Lexer
     {
         if ($this->char === "\n") {
             $this->value = $this->char;
+
             return true;
         }
 
@@ -296,6 +297,7 @@ class Lexer
     {
         if ($this->char === "\0") {
             $this->value = $this->char;
+
             return true;
         }
 
