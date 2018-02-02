@@ -21,7 +21,6 @@ use PhpYacc\Yacc\Production;
  * @property int $associativity
  * @property string $name
  * @property int $terminal
- *
  */
 class Symbol
 {
