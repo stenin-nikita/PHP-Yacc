@@ -60,6 +60,8 @@ class Generator
 
     /**
      * @param Context $context
+     * @return void
+     * @throws LogicException
      */
     public function compute(Context $context)
     {
@@ -240,6 +242,7 @@ class Generator
 
     /**
      * @return void
+     * @throws LogicException
      */
     protected function fillReduce()
     {

@@ -14,6 +14,14 @@ use PhpYacc\Yacc\Production;
 
 /**
  * Class Symbol.
+ *
+ * @property null|Symbol $type
+ * @property mixed $value
+ * @property int $precedence
+ * @property int $associativity
+ * @property string $name
+ * @property int $terminal
+ *
  */
 class Symbol
 {

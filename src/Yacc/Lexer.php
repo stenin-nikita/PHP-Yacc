@@ -211,6 +211,7 @@ class Lexer
 
     /**
      * @return bool
+     * @throws LexingException
      */
     protected function isWhitespace(): bool
     {
@@ -242,9 +243,9 @@ class Lexer
     }
 
     /**
-     * @throws ParseException
-     *
      * @return bool
+     * @throws LexingException
+     * @throws ParseException
      */
     protected function isComment(): bool
     {
@@ -305,9 +306,9 @@ class Lexer
     }
 
     /**
-     * @throws ParseException
-     *
      * @return int
+     * @throws LexingException
+     * @throws ParseException
      */
     protected function detectToken()
     {

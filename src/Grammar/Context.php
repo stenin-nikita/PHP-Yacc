@@ -16,6 +16,13 @@ use PhpYacc\Yacc\Production;
 
 /**
  * Class Context.
+ *
+ * @property Symbol $nilsymbol
+ * @property array|Symbol[] $symbols
+ * @property array|State[] $states
+ * @property array|Production[] $grams
+ * @property \Generator $nonterminals
+ * @property \Generator $terminals
  */
 class Context
 {
@@ -364,7 +371,7 @@ class Context
         }
         if ($isTerm || $s[0] === "'") {
             if ($s[0] === "'") {
-                $p->value = Utils::characterValue(\mb_substr($s, 1, 1));
+                $p->value = Utils::characterValue(\mb_substr($s, 1, -1));
             } else {
                 $p->value = -1;
             }

@@ -294,7 +294,7 @@ class Parser
         $this->eofToken = $this->context->internSymbol('EOF', true);
         $this->eofToken->value = 0;
         $this->errorToken = $this->context->internSymbol('error', true);
-        $this->startPrime = $this->context->internSymbol('$start', false);
+        $this->startPrime = $this->context->internSymbol("\$start", false);
 
         while (($token = $this->lexer->getToken())->getType() !== Token::MARK) {
             switch ($token->getType()) {
@@ -426,7 +426,7 @@ class Parser
         if ($token->getValue()[0] !== '<') {
             $this->lexer->ungetToken();
 
-            return;
+            return null;
         }
 
         $ct = 1;
@@ -456,5 +456,18 @@ class Parser
         $this->context->unioned = true;
 
         return $this->context->intern($p);
+    }
+
+    /**
+     * @return void
+     */
+    protected function doCopy()
+    {
+        // TODO
+    }
+
+    protected function doUnion()
+    {
+        // TODO
     }
 }
