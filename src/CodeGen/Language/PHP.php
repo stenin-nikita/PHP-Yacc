@@ -104,7 +104,7 @@ class PHP implements Language
     public function writeQuoted(string $text)
     {
         $buf = [];
-        for($i = 0; $i < \mb_strlen($text); $i++) {
+        for ($i = 0; $i < \mb_strlen($text); $i++) {
             $char = $text[$i];
 
             if ($char == '\\' || $char == '"' || $char == '$') {

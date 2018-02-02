@@ -294,7 +294,7 @@ class Parser
         $this->eofToken = $this->context->internSymbol('EOF', true);
         $this->eofToken->value = 0;
         $this->errorToken = $this->context->internSymbol('error', true);
-        $this->startPrime = $this->context->internSymbol("\$start", false);
+        $this->startPrime = $this->context->internSymbol('$start', false);
 
         while (($token = $this->lexer->getToken())->getType() !== Token::MARK) {
             switch ($token->getType()) {
@@ -426,7 +426,7 @@ class Parser
         if ($token->getValue()[0] !== '<') {
             $this->lexer->ungetToken();
 
-            return null;
+            return;
         }
 
         $ct = 1;
