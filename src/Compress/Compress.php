@@ -14,7 +14,7 @@ use PhpYacc\Grammar\Symbol;
 use PhpYacc\Support\Utils;
 
 /**
- * Class Compress
+ * Class Compress.
  */
 class Compress
 {
@@ -321,7 +321,7 @@ class Compress
             $this->context->debug("Used aux table:\n");
         }
         $this->context->countAux = $this->context->countClasses;
-        for (;;) {
+        for (; ;) {
             $maxGain = 0;
             $maxAux = null;
             $pre = null;
