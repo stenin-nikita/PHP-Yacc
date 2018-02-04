@@ -19,7 +19,7 @@ use PhpYacc\Support\Utils;
 use PhpYacc\Yacc\Production;
 
 /**
- * Class Generator
+ * Class Generator.
  */
 class Generator
 {

@@ -8,6 +8,7 @@
 declare(strict_types=1);
 
 namespace PhpYacc\Support;
+
 use PhpYacc\Compress\Compress;
 use PhpYacc\Grammar\Context;
 use PhpYacc\Lalr\BitSet;
@@ -129,7 +130,8 @@ final class Utils
 
     /**
      * @param array $array
-     * @param int $length
+     * @param int   $length
+     *
      * @return bool
      */
     public static function vacantRow(array $array, int $length): bool
@@ -146,7 +148,8 @@ final class Utils
     /**
      * @param array $a
      * @param array $b
-     * @param int $length
+     * @param int   $length
+     *
      * @return bool
      */
     public static function eqRow(array $a, array $b, int $length): bool
@@ -162,6 +165,7 @@ final class Utils
 
     /**
      * @param int $action
+     *
      * @return string
      */
     public static function printAction(int $action): string
@@ -176,6 +180,7 @@ final class Utils
     /**
      * @param Lr1|null $left
      * @param Lr1|null $right
+     *
      * @return bool
      */
     public static function isSameSet(Lr1 $left = null, Lr1 $right = null): bool
@@ -190,12 +195,14 @@ final class Utils
             $p = $p->next;
             $t = $t->next;
         }
+
         return $p === null || $p->isHeadItem();
     }
 
     /**
      * @param Context $ctx
-     * @param BitSet $set
+     * @param BitSet  $set
+     *
      * @return string
      */
     public static function dumpSet(Context $ctx, BitSet $set): string

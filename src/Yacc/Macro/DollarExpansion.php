@@ -19,10 +19,10 @@ use PhpYacc\Yacc\Token;
  */
 class DollarExpansion extends MacroAbstract
 {
-    const SEMVAL_LHS_TYPED      = 1;
-    const SEMVAL_LHS_UNTYPED    = 2;
-    const SEMVAL_RHS_TYPED      = 3;
-    const SEMVAL_RHS_UNTYPED    = 4;
+    const SEMVAL_LHS_TYPED = 1;
+    const SEMVAL_LHS_UNTYPED = 2;
+    const SEMVAL_RHS_TYPED = 3;
+    const SEMVAL_RHS_UNTYPED = 4;
 
     /**
      * @param Context   $ctx

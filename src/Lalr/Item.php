@@ -97,8 +97,10 @@ class Item implements \ArrayAccess, \IteratorAggregate
 
     /**
      * @param mixed $index
-     * @return void
+     *
      * @throws LogicException
+     *
+     * @return void
      */
     public function offsetUnset($index)
     {
