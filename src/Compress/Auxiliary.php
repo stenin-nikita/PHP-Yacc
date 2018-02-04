@@ -14,9 +14,23 @@ namespace PhpYacc\Compress;
  */
 class Auxiliary
 {
+    /**
+     * @var Auxiliary
+     */
     public $next;
-    public $index;
+
+    /**
+     * @var int
+     */
     public $gain;
-    public $preimage;
+
+    /**
+     * @var PreImage
+     */
+    public $preImage;
+
+    /**
+     * @var array
+     */
     public $table = [];
 }

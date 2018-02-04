@@ -22,7 +22,7 @@ class Template
     /**
      * @var string
      */
-    protected $metachar = '$';
+    protected $metaChar = '$';
 
     /**
      * @var array
@@ -32,12 +32,12 @@ class Template
     /**
      * @var int
      */
-    protected $lineno = 0;
+    protected $lineNumber = 0;
 
     /**
      * @var bool
      */
-    protected $copy_header = false;
+    protected $copyHeader = false;
 
     /**
      * @var Context
@@ -88,81 +88,81 @@ class Template
         $this->compress = $result;
         unset($result);
 
-        $skipmode = false;
-        $linechanged = false;
-        $tailcode = false;
-        $reducemode = [
+        $skipMode = false;
+        $lineChanged = false;
+        $tailCode = false;
+        $reduceMode = [
             'enabled' => false,
             'm'       => -1,
             'n'       => 0,
             'mac'     => [],
         ];
-        $tokenmode = [
+        $tokenMode = [
             'enabled' => false,
             'mac'     => [],
         ];
         $buffer = '';
-        $this->print_line();
+
         foreach ($this->template as $line) {
             $line .= "\n";
-            if ($tailcode) {
+            if ($tailCode) {
                 $this->language->write($buffer.$line);
                 continue;
             }
 
-            if ($skipmode) {
-                if ($this->metamatch(\ltrim($line), 'endif')) {
-                    $skipmode = false;
+            if ($skipMode) {
+                if ($this->metaMatch(\ltrim($line), 'endif')) {
+                    $skipMode = false;
                 }
                 continue;
             }
 
-            if ($reducemode['enabled']) {
-                if ($this->metamatch(\trim($line), 'endreduce')) {
-                    $reducemode['enabled'] = false;
-                    $this->lineno++;
-                    if ($reducemode['m'] < 0) {
-                        $reducemode['m'] = $reducemode['n'];
+            if ($reduceMode['enabled']) {
+                if ($this->metaMatch(\trim($line), 'endreduce')) {
+                    $reduceMode['enabled'] = false;
+                    $this->lineNumber++;
+                    if ($reduceMode['m'] < 0) {
+                        $reduceMode['m'] = $reduceMode['n'];
                     }
 
                     foreach ($this->context->grams as $gram) {
                         if ($gram->action) {
-                            for ($j = 0; $j < $reducemode['m']; $j++) {
-                                $this->expand_mac($reducemode['mac'][$j], $gram->num, null);
+                            for ($j = 0; $j < $reduceMode['m']; $j++) {
+                                $this->expandMacro($reduceMode['mac'][$j], $gram->num, null);
                             }
                         } else {
-                            for ($j = $reducemode['m']; $j < $reducemode['n']; $j++) {
-                                $this->expand_mac($reducemode['mac'][$j], $gram->num, null);
+                            for ($j = $reduceMode['m']; $j < $reduceMode['n']; $j++) {
+                                $this->expandMacro($reduceMode['mac'][$j], $gram->num, null);
                             }
                         }
                     }
                     continue;
-                } elseif ($this->metamatch(\trim($line), 'noact')) {
-                    $reducemode['m'] = $reducemode['n'];
+                } elseif ($this->metaMatch(\trim($line), 'noact')) {
+                    $reduceMode['m'] = $reduceMode['n'];
                     continue;
                 }
-                $reducemode['mac'][$reducemode['n']++] = $line;
+                $reduceMode['mac'][$reduceMode['n']++] = $line;
                 continue;
             }
 
-            if ($tokenmode['enabled']) {
-                if ($this->metamatch(\trim($line), 'endtokenval')) {
-                    $tokenmode['enabled'] = false;
-                    $this->lineno++;
-                    for ($i = 1; $i < $this->context->nterminals; $i++) {
+            if ($tokenMode['enabled']) {
+                if ($this->metaMatch(\trim($line), 'endtokenval')) {
+                    $tokenMode['enabled'] = false;
+                    $this->lineNumber++;
+                    for ($i = 1; $i < $this->context->countTerminals; $i++) {
                         $symbol = $this->context->symbol($i);
                         if ($symbol->name[0] != '\'') {
                             $str = $symbol->name;
                             if ($i === 1) {
                                 $str = 'YYERRTOK';
                             }
-                            foreach ($tokenmode['mac'] as $mac) {
-                                $this->expand_mac($mac, $symbol->value, $str);
+                            foreach ($tokenMode['mac'] as $mac) {
+                                $this->expandMacro($mac, $symbol->value, $str);
                             }
                         }
                     }
                 } else {
-                    $tokenmode['mac'][] = $line;
+                    $tokenMode['mac'][] = $line;
                 }
                 continue;
             }
@@ -170,12 +170,12 @@ class Template
             $buffer = '';
             for ($i = 0; $i < \mb_strlen($line); $i++) {
                 $p = \mb_substr($line, $i);
-                if ($p[0] !== $this->metachar) {
+                if ($p[0] !== $this->metaChar) {
                     $buffer .= $line[$i];
-                } elseif ($i + 1 < \mb_strlen($line) && $p[1] === $this->metachar) {
+                } elseif ($i + 1 < \mb_strlen($line) && $p[1] === $this->metaChar) {
                     $i++;
-                    $buffer .= $this->metachar;
-                } elseif ($this->metamatch($p, '(')) {
+                    $buffer .= $this->metaChar;
+                } elseif ($this->metaMatch($p, '(')) {
                     $start = $i + 2;
                     $val = \mb_substr($p, 2);
                     while ($i < \mb_strlen($line) && $line[$i] !== ')') {
@@ -186,49 +186,49 @@ class Template
                     }
                     $length = $i - $start;
 
-                    $buffer .= $this->gen_valueof(\mb_substr($val, 0, $length));
-                } elseif ($this->metamatch($p, 'TYPEOF(')) {
+                    $buffer .= $this->genValueOf(\mb_substr($val, 0, $length));
+                } elseif ($this->metaMatch($p, 'TYPEOF(')) {
                     throw new LogicException('TYPEOF is not implemented');
                 } else {
                     break;
                 }
             }
-            if (isset($p[0]) && $p[0] === $this->metachar) {
+            if (isset($p[0]) && $p[0] === $this->metaChar) {
                 if (\trim($buffer) !== '') {
                     throw new TemplateException('Non-blank character before $-keyword');
                 }
-                if ($this->metamatch($p, 'header')) {
-                    $this->copy_header = true;
-                } elseif ($this->metamatch($p, 'endheader')) {
-                    $this->copy_header = false;
-                } elseif ($this->metamatch($p, 'tailcode')) {
-                    $this->print_line();
-                    $tailcode = true;
+                if ($this->metaMatch($p, 'header')) {
+                    $this->copyHeader = true;
+                } elseif ($this->metaMatch($p, 'endheader')) {
+                    $this->copyHeader = false;
+                } elseif ($this->metaMatch($p, 'tailcode')) {
+                    //$this->printLine();
+                    $tailCode = true;
                     continue;
-                } elseif ($this->metamatch($p, 'verification-table')) {
+                } elseif ($this->metaMatch($p, 'verification-table')) {
                     throw new TemplateException('verification-table is not implemented');
-                } elseif ($this->metamatch($p, 'union')) {
+                } elseif ($this->metaMatch($p, 'union')) {
                     throw new TemplateException('union is not implemented');
-                } elseif ($this->metamatch($p, 'tokenval')) {
-                    $tokenmode = [
+                } elseif ($this->metaMatch($p, 'tokenval')) {
+                    $tokenMode = [
                         'enabled' => true,
                         'mac'     => [],
                     ];
-                } elseif ($this->metamatch($p, 'reduce')) {
-                    $reducemode = [
+                } elseif ($this->metaMatch($p, 'reduce')) {
+                    $reduceMode = [
                         'enabled' => true,
                         'm'       => -1,
                         'n'       => 0,
                         'mac'     => [],
                     ];
-                } elseif ($this->metamatch($p, 'switch-for-token-name')) {
-                    for ($i = 0; $i < $this->context->nterminals; $i++) {
-                        if ($this->context->ctermindex[$i] >= 0) {
+                } elseif ($this->metaMatch($p, 'switch-for-token-name')) {
+                    for ($i = 0; $i < $this->context->countTerminals; $i++) {
+                        if ($this->context->cTermIndex[$i] >= 0) {
                             $symbol = $this->context->symbol($i);
-                            $this->language->case_block($buffer, $symbol->value, $symbol->name);
+                            $this->language->caseBlock($buffer, $symbol->value, $symbol->name);
                         }
                     }
-                } elseif ($this->metamatch($p, 'production-strings')) {
+                } elseif ($this->metaMatch($p, 'production-strings')) {
                     foreach ($this->context->grams as $gram) {
                         $info = \array_slice($gram->body, 0);
                         $this->language->write($buffer.'"');
@@ -240,31 +240,31 @@ class Template
                         for ($i = 1; $i < \count($info); $i++) {
                             $this->language->writeQuoted(' '.$info[$i]->name);
                         }
-                        if ($gram->num + 1 === $this->context->ngrams) {
+                        if ($gram->num + 1 === $this->context->countGrams) {
                             $this->language->write("\"\n");
                         } else {
                             $this->language->write("\",\n");
                         }
                     }
-                } elseif ($this->metamatch($p, 'listvar')) {
+                } elseif ($this->metaMatch($p, 'listvar')) {
                     $var = \trim(\mb_substr($p, 9));
-                    $this->gen_list_var($buffer, $var);
-                } elseif ($this->metamatch($p, 'ifnot')) {
-                    $skipmode = $skipmode || !$this->skipif($p);
-                } elseif ($this->metamatch($p, 'if')) {
-                    $skipmode = $skipmode || $this->skipif($p);
-                } elseif ($this->metamatch($p, 'endif')) {
-                    $skipmode = false;
+                    $this->genListVar($buffer, $var);
+                } elseif ($this->metaMatch($p, 'ifnot')) {
+                    $skipMode = $skipMode || !$this->skipIf($p);
+                } elseif ($this->metaMatch($p, 'if')) {
+                    $skipMode = $skipMode || $this->skipIf($p);
+                } elseif ($this->metaMatch($p, 'endif')) {
+                    $skipMode = false;
                 } else {
                     throw new TemplateException("Unknown \$: $line");
                 }
-                $linechanged = true;
+                $lineChanged = true;
             } else {
-                if ($linechanged) {
-                    $this->print_line();
-                    $linechanged = false;
+                if ($lineChanged) {
+                    //$this->printLine();
+                    $lineChanged = false;
                 }
-                $this->language->write($buffer, $this->copy_header);
+                $this->language->write($buffer, $this->copyHeader);
             }
         }
 
@@ -278,9 +278,10 @@ class Template
      *
      * @return bool
      */
-    protected function skipif(string $spec): bool
+    protected function skipIf(string $spec): bool
     {
         [ $dump, $test ] = \explode(' ', $spec, 2);
+
         $test = \trim($test);
         switch ($test) {
             case '-a':
@@ -290,10 +291,10 @@ class Template
                 return $this->context->tflag;
 
             case '-p':
-                return (bool) $this->context->pspref;
+                return (bool) $this->context->className;
 
             case '%union':
-                return (bool) $this->context->union_body;
+                return (bool) $this->context->unioned;
 
             case '%pure_parser':
                 return $this->context->pureFlag;
@@ -308,7 +309,7 @@ class Template
      * @param int         $value
      * @param string|null $str
      */
-    protected function expand_mac(string $def, int $value, string $str = null)
+    protected function expandMacro(string $def, int $value, string $str = null)
     {
         $result = '';
         for ($i = 0; $i < \mb_strlen($def); $i++) {
@@ -326,7 +327,7 @@ class Template
 
                     case 'b':
                         $gram = $this->context->gram($value);
-                        $this->print_line($gram->position);
+                        $this->printLine($gram->position);
                         $result .= $gram->action;
                         break;
 
@@ -339,7 +340,7 @@ class Template
             }
         }
 
-        $this->language->write($result, $this->copy_header);
+        $this->language->write($result, $this->copyHeader);
     }
 
     /**
@@ -348,7 +349,7 @@ class Template
      *
      * @throws TemplateException
      */
-    protected function gen_list_var(string $indent, string $var)
+    protected function genListVar(string $indent, string $var)
     {
         $size = -1;
         if (isset($this->compress->$var)) {
@@ -356,17 +357,17 @@ class Template
             if (isset($this->compress->{$var.'size'})) {
                 $size = $this->compress->{$var.'size'};
             } elseif ($var === 'yydefault') {
-                $size = $this->context->nnonleafstates;
+                $size = $this->context->countNonLeafStates;
             } elseif (\in_array($var, ['yygbase', 'yygdefault'])) {
-                $size = $this->context->nnonterminals;
+                $size = $this->context->countNonTerminals;
             } elseif (\in_array($var, ['yylhs', 'yylen'])) {
-                $size = $this->context->ngrams;
+                $size = $this->context->countGrams;
             }
-            $this->print_array($array, $size < 0 ? count($array) : $size, $indent);
+            $this->printArray($array, $size < 0 ? count($array) : $size, $indent);
         } elseif ($var === 'terminals') {
             $nl = 0;
             foreach ($this->context->terminals as $term) {
-                if ($this->context->ctermindex[$term->code] >= 0) {
+                if ($this->context->cTermIndex[$term->code] >= 0) {
                     $prefix = $nl++ ? ",\n" : '';
                     $this->language->write($prefix.$indent.'"');
                     $this->language->writeQuoted($term->name);
@@ -393,7 +394,7 @@ class Template
      * @param int    $limit
      * @param string $indent
      */
-    protected function print_array(array $array, int $limit, string $indent)
+    protected function printArray(array $array, int $limit, string $indent)
     {
         $col = 0;
         for ($i = 0; $i < $limit; $i++) {
@@ -418,19 +419,19 @@ class Template
      *
      * @return string
      */
-    protected function gen_valueof(string $var): string
+    protected function genValueOf(string $var): string
     {
         switch ($var) {
             case 'YYSTATES':
-                return \sprintf('%d', $this->context->nstates);
+                return \sprintf('%d', $this->context->countStates);
             case 'YYNLSTATES':
-                return \sprintf('%d', $this->context->nnonleafstates);
+                return \sprintf('%d', $this->context->countNonLeafStates);
             case 'YYINTERRTOK':
                 return \sprintf('%d', $this->compress->yytranslate[$this->context->errorToken->value]);
             case 'YYUNEXPECTED':
-                return \sprintf('%d', Compress::YYUNEXPECTED);
+                return \sprintf('%d', Compress::UNEXPECTED);
             case 'YYDEFAULT':
-                return \sprintf('%d', Compress::YYDEFAULT);
+                return \sprintf('%d', Compress::DEFAULT);
             case 'YYMAXLEX':
                 return \sprintf('%d', \count($this->compress->yytranslate));
             case 'YYLAST':
@@ -441,12 +442,12 @@ class Template
             case 'YYBADCH':
                 return \sprintf('%d', $this->compress->yyncterms);
             case 'YYNONTERMS':
-                return \sprintf('%d', $this->context->nnonterminals);
+                return \sprintf('%d', $this->context->countNonTerminals);
             case 'YY2TBLSTATE':
-                return \sprintf('%d', $this->compress->yybasesize - $this->context->nnonleafstates);
+                return \sprintf('%d', $this->compress->yybasesize - $this->context->countNonLeafStates);
             case 'CLASSNAME':
             case '-p':
-                return $this->context->pspref ?: 'yy';
+                return $this->context->className ?: 'yy';
             default:
                 throw new TemplateException("Unknown variable: \$($var)");
         }
@@ -461,7 +462,7 @@ class Template
     {
         $template = \preg_replace("(\r\n|\r)", "\n", $template);
         $lines = \explode("\n", $template);
-        $this->lineno = 1;
+        $this->lineNumber = 1;
         $skip = false;
 
         foreach ($lines as $line) {
@@ -473,16 +474,16 @@ class Template
             while (\mb_strlen($p) > 0 && Utils::isWhite($p[0])) {
                 $p = \mb_substr($p, 1);
             }
-            $this->lineno++;
-            if ($this->metamatch($p, 'include')) {
+            $this->lineNumber++;
+            if ($this->metaMatch($p, 'include')) {
                 $skip = true;
-            } elseif ($this->metamatch($p, 'meta')) {
+            } elseif ($this->metaMatch($p, 'meta')) {
                 if (!isset($p[6]) || Utils::isWhite($p[6])) {
                     throw new TemplateException("\$meta: missing character in definition: $p");
                 }
-                $this->metachar = $p[6];
-            } elseif ($this->metamatch($p, 'semval')) {
-                $this->def_semval_macro(\mb_substr($p, 7));
+                $this->metaChar = $p[6];
+            } elseif ($this->metaMatch($p, 'semval')) {
+                $this->defSemvalMacro(\mb_substr($p, 7));
             } else {
                 $this->template[] = $line;
             }
@@ -495,9 +496,9 @@ class Template
      *
      * @return bool
      */
-    protected function metamatch(string $text, string $keyword): bool
+    protected function metaMatch(string $text, string $keyword): bool
     {
-        return isset($text[0]) && $text[0] === $this->metachar && \mb_substr($text, 1, \mb_strlen($keyword)) === $keyword;
+        return isset($text[0]) && $text[0] === $this->metaChar && \mb_substr($text, 1, \mb_strlen($keyword)) === $keyword;
     }
 
     /**
@@ -505,7 +506,7 @@ class Template
      *
      * @throws TemplateException
      */
-    protected function def_semval_macro(string $macro)
+    protected function defSemvalMacro(string $macro)
     {
         if (\mb_strpos($macro, '($)') !== false) {
             $this->context->macros[DollarExpansion::SEMVAL_LHS_UNTYPED] = \ltrim(\mb_substr($macro, 3));
@@ -524,14 +525,11 @@ class Template
      * @param int         $line
      * @param string|null $filename
      */
-    protected function print_line(int $line = -1, string $filename = null)
+    protected function printLine(int $line = -1, string $filename = null)
     {
-        if ($line === -1) {
-            $line = $this->lineno;
-        }
-        if ($filename === null) {
-            $filename = $this->context->filename;
-        }
-        //$this->language->inline_comment("{$filename}:$line");
+        $line = $line === -1 ? $this->lineNumber : $line;
+        $filename = $filename ?? $this->context->filename;
+
+        $this->language->inlineComment(\sprintf('%s:%d', $filename, $line));
     }
 }

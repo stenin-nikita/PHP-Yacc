@@ -30,7 +30,7 @@ class Symbol
     const NON = 3;
     const MASK = 3;
     const TERMINAL = 0x100;
-    const NONTERMINAL = 0x200;
+    const NON_TERMINAL = 0x200;
 
     /**
      * @var int
@@ -65,7 +65,7 @@ class Symbol
     /**
      * @var bool
      */
-    public $isterminal = false;
+    public $isTerminal = false;
 
     /**
      * @var bool
@@ -137,13 +137,13 @@ class Symbol
     {
         $this->_terminal = $terminal;
         if ($terminal === self::TERMINAL) {
-            $this->isterminal = true;
+            $this->isTerminal = true;
             $this->isnonterminal = false;
-        } elseif ($terminal === self::NONTERMINAL) {
-            $this->isterminal = false;
+        } elseif ($terminal === self::NON_TERMINAL) {
+            $this->isTerminal = false;
             $this->isnonterminal = true;
         } else {
-            $this->isterminal = false;
+            $this->isTerminal = false;
             $this->isnonterminal = false;
         }
         $this->setValue($this->_value); // force check to prevent issues
@@ -172,7 +172,7 @@ class Symbol
      */
     public function setValue($value)
     {
-        if ($this->isterminal && !is_int($value)) {
+        if ($this->isTerminal && !is_int($value)) {
             throw new LogicException('Terminals value must be an integer, '.\gettype($value).' provided');
         } elseif ($this->isnonterminal && !($value instanceof Production || $value === null)) {
             throw new LogicException('NonTerminals value must be a production, '.\gettype($value).' provided');

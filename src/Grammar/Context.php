@@ -39,17 +39,17 @@ class Context
     /**
      * @var int
      */
-    public $nsymbols = 0;
+    public $countSymbols = 0;
 
     /**
      * @var int
      */
-    public $nterminals = 0;
+    public $countTerminals = 0;
 
     /**
      * @var int
      */
-    public $nnonterminals = 0;
+    public $countNonTerminals = 0;
 
     /**
      * @var array
@@ -79,12 +79,12 @@ class Context
     /**
      * @var int
      */
-    public $nstates = 0;
+    public $countStates = 0;
 
     /**
      * @var int
      */
-    public $nnonleafstates = 0;
+    public $countNonLeafStates = 0;
 
     /**
      * @var bool
@@ -99,7 +99,7 @@ class Context
     /**
      * @var string
      */
-    public $pspref = '';
+    public $className = '';
 
     /**
      * @var bool
@@ -115,7 +115,15 @@ class Context
      * @var bool
      */
     public $pureFlag = false;
+
+    /**
+     * @var Symbol
+     */
     public $startSymbol;
+
+    /**
+     * @var int
+     */
     public $expected;
 
     /**
@@ -123,8 +131,19 @@ class Context
      */
     public $unioned = false;
 
+    /**
+     * @var Symbol
+     */
     public $eofToken;
+
+    /**
+     * @var Symbol
+     */
     public $errorToken;
+
+    /**
+     * @var Symbol
+     */
     public $startPrime;
 
     /**
@@ -135,47 +154,47 @@ class Context
     /**
      * @var int
      */
-    public $ngrams = 0;
+    public $countGrams = 0;
 
     /**
      * @var array
      */
-    public $default_act = [];
+    public $defaultAct = [];
 
     /**
      * @var array
      */
-    public $default_goto = [];
+    public $defaultGoto = [];
 
     /**
      * @var array
      */
-    public $term_action = [];
+    public $termAction = [];
 
     /**
      * @var array
      */
-    public $class_action = [];
+    public $classAction = [];
 
     /**
      * @var array
      */
-    public $nonterm_goto = [];
+    public $nonTermGoto = [];
 
     /**
      * @var array
      */
-    public $class_of = [];
+    public $classOf = [];
 
     /**
      * @var array
      */
-    public $ctermindex = [];
+    public $cTermIndex = [];
 
     /**
      * @var array
      */
-    public $otermindex = [];
+    public $oTermIndex = [];
 
     /**
      * @var array
@@ -185,12 +204,12 @@ class Context
     /**
      * @var array
      */
-    public $state_imagesorted = [];
+    public $stateImageSorted = [];
 
     /**
      * @var int
      */
-    public $nprims = 0;
+    public $countPrims = 0;
 
     /**
      * @var array
@@ -210,12 +229,12 @@ class Context
     /**
      * @var int
      */
-    public $nclasses = 0;
+    public $countClasses = 0;
 
     /**
      * @var int
      */
-    public $naux = 0;
+    public $countAux = 0;
 
     /**
      * @var null|resource
@@ -246,10 +265,8 @@ class Context
 
     /**
      * @param $name
-     *
+     * @return mixed
      * @throws LogicException
-     *
-     * @return \Generator
      */
     public function __get($name)
     {
@@ -257,6 +274,7 @@ class Context
             case 'terminals': return $this->terminals();
             case 'nonterminals': return $this->nonTerminals();
         }
+
         if (!isset($this->{'_'.$name})) {
             throw new LogicException("Should never happen: unknown property $name");
         }
@@ -281,14 +299,18 @@ class Context
         if ($this->finished) {
             return;
         }
+
         $this->finished = true;
         $code = 0;
+
         foreach ($this->terminals() as $term) {
             $term->code = $code++;
         }
+
         foreach ($this->nonTerminals() as $nonterm) {
             $nonterm->code = $code++;
         }
+
         foreach ($this->nilSymbols() as $nil) {
             $nil->code = $code++;
         }
@@ -316,7 +338,7 @@ class Context
     public function terminals(): \Generator
     {
         foreach ($this->_symbols as $symbol) {
-            if ($symbol->isterminal) {
+            if ($symbol->isTerminal) {
                 yield $symbol;
             }
         }
@@ -351,7 +373,7 @@ class Context
      */
     public function genNonTerminal(): Symbol
     {
-        $buffer = \sprintf('@%d', $this->nnonterminals);
+        $buffer = \sprintf('@%d', $this->countNonTerminals);
 
         return $this->internSymbol($buffer, false);
     }
@@ -369,6 +391,7 @@ class Context
         if (!$p->isNilSymbol()) {
             return $p;
         }
+
         if ($isTerm || $s[0] === "'") {
             if ($s[0] === "'") {
                 $p->value = Utils::characterValue(\mb_substr($s, 1, -1));
@@ -378,7 +401,7 @@ class Context
             $p->terminal = Symbol::TERMINAL;
         } else {
             $p->value = null;
-            $p->terminal = Symbol::NONTERMINAL;
+            $p->terminal = Symbol::NON_TERMINAL;
         }
 
         $p->associativity = Symbol::UNDEF;
@@ -397,7 +420,7 @@ class Context
         if (isset($this->symbolHash[$s])) {
             return $this->symbolHash[$s];
         }
-        $p = new Symbol($this->nsymbols++, $s);
+        $p = new Symbol($this->countSymbols++, $s);
 
         return $this->addSymbol($p);
     }
@@ -412,13 +435,14 @@ class Context
         $this->finished = false;
         $this->_symbols[] = $symbol;
         $this->symbolHash[$symbol->name] = $symbol;
-        $this->nterminals = 0;
-        $this->nnonterminals = 0;
+        $this->countTerminals = 0;
+        $this->countNonTerminals = 0;
+
         foreach ($this->_symbols as $symbol) {
-            if ($symbol->isterminal) {
-                $this->nterminals++;
+            if ($symbol->isTerminal) {
+                $this->countTerminals++;
             } elseif ($symbol->isnonterminal) {
-                $this->nnonterminals++;
+                $this->countNonTerminals++;
             }
         }
 
@@ -456,7 +480,7 @@ class Context
      */
     public function addGram(Production $p)
     {
-        $p->num = $this->ngrams++;
+        $p->num = $this->countGrams++;
         $this->_grams[] = $p;
 
         return $p;
@@ -469,7 +493,7 @@ class Context
      */
     public function gram(int $i): Production
     {
-        assert($i < $this->ngrams);
+        \assert($i < $this->countGrams);
 
         return $this->_grams[$i];
     }
@@ -480,17 +504,17 @@ class Context
     public function setStates(array $states)
     {
         foreach ($states as $state) {
-            assert($state instanceof State);
+            \assert($state instanceof State);
         }
         $this->_states = $states;
-        $this->nstates = \count($states);
+        $this->countStates = \count($states);
     }
 
     /**
      * @param int $n
      */
-    public function setNNonLeafStates(int $n)
+    public function setCountNonLeafStates(int $n)
     {
-        $this->nnonleafstates = $n;
+        $this->countNonLeafStates = $n;
     }
 }

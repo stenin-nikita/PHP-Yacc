@@ -51,7 +51,7 @@ for ($i = 1; $i < $argc - 1; $i++) {
             if ($i === $argc - 2) {
                 error("Class name required for option -p");
             }
-            $context->pspref = $argv[++$i];
+            $context->className = $argv[++$i];
             break;
         case '-x':
             $context->debugFile = fopen(getcwd() . "/y.output", 'w' );

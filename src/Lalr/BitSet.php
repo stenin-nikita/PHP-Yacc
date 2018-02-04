@@ -12,7 +12,7 @@ namespace PhpYacc\Lalr;
 /**
  * Interface Bitset.
  */
-interface Bitset extends \IteratorAggregate
+interface BitSet extends \IteratorAggregate
 {
     /**
      * @param int $i
@@ -32,7 +32,7 @@ interface Bitset extends \IteratorAggregate
     public function clearBit(int $i);
 
     /**
-     * @param Bitset $other
+     * @param BitSet $other
      *
      * @return bool
      */

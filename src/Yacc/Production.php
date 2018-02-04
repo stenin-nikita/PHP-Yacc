@@ -46,7 +46,7 @@ class Production
     /**
      * @var array|Symbol[]
      */
-    public $body;
+    public $body = [];
 
     /**
      * @var int
@@ -63,7 +63,6 @@ class Production
     {
         $this->action = $action;
         $this->position = $position;
-        $this->body = [];
     }
 
     /**

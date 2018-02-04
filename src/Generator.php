@@ -54,9 +54,14 @@ class Generator
 
     /**
      * @param Context $context
-     * @param string  $grammar
-     * @param string  $template
-     * @param string  $resultFile
+     * @param string $grammar
+     * @param string $template
+     * @param string $resultFile
+     * @return void
+     * @throws Exception\LexingException
+     * @throws Exception\LogicException
+     * @throws Exception\ParseException
+     * @throws Exception\TemplateException
      */
     public function generate(Context $context, string $grammar, string $template, string $resultFile)
     {

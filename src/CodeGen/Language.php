@@ -44,12 +44,12 @@ interface Language
     /**
      * @param string $text
      */
-    public function inline_comment(string $text);
+    public function inlineComment(string $text);
 
     /**
      * @param string $indent
      * @param int    $num
      * @param string $value
      */
-    public function case_block(string $indent, int $num, string $value);
+    public function caseBlock(string $indent, int $num, string $value);
 }

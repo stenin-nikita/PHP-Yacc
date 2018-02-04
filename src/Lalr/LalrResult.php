@@ -22,7 +22,7 @@ class LalrResult
     /**
      * @var int
      */
-    public $nstates = 0;
+    public $countStates = 0;
 
     /**
      * @var array
@@ -37,22 +37,22 @@ class LalrResult
     /**
      * @var int
      */
-    public $nnonleafstates;
+    public $countNonLeafStates;
 
     /**
      * LalrResult constructor.
      *
      * @param array  $grams
      * @param array  $states
-     * @param int    $nnonleafstates
+     * @param int    $countNonLeafStates
      * @param string $output
      */
-    public function __construct(array $grams, array $states, int $nnonleafstates, string $output)
+    public function __construct(array $grams, array $states, int $countNonLeafStates, string $output)
     {
         $this->grams = $grams;
         $this->states = $states;
-        $this->nstates = \count($states);
+        $this->countStates = \count($states);
         $this->output = $output;
-        $this->nnonleafstates = $nnonleafstates;
+        $this->countNonLeafStates = $countNonLeafStates;
     }
 }

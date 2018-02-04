@@ -12,9 +12,9 @@ namespace PhpYacc\Lalr;
 /**
  * Class ArrayBitset.
  */
-class ArrayBitset implements Bitset
+class ArrayBitSet implements BitSet
 {
-    const NBITS = \PHP_INT_SIZE * 8;
+    const BITS = \PHP_INT_SIZE * 8;
 
     /**
      * @var int
@@ -34,7 +34,7 @@ class ArrayBitset implements Bitset
     public function __construct(int $numBits)
     {
         $this->numBits = $numBits;
-        $this->array = \array_fill(0, intdiv($numBits + self::NBITS - 1, self::NBITS), 0);
+        $this->array = \array_fill(0, intdiv($numBits + self::BITS - 1, self::BITS), 0);
     }
 
     /**
@@ -52,7 +52,7 @@ class ArrayBitset implements Bitset
      */
     public function testBit(int $i): bool
     {
-        return ($this->array[$i / self::NBITS] & (1 << ($i % self::NBITS))) !== 0;
+        return ($this->array[$i / self::BITS] & (1 << ($i % self::BITS))) !== 0;
     }
 
     /**
@@ -60,7 +60,7 @@ class ArrayBitset implements Bitset
      */
     public function setBit(int $i)
     {
-        $this->array[$i / self::NBITS] |= (1 << ($i % self::NBITS));
+        $this->array[$i / self::BITS] |= (1 << ($i % self::BITS));
     }
 
     /**
@@ -68,17 +68,17 @@ class ArrayBitset implements Bitset
      */
     public function clearBit(int $i)
     {
-        $this->array[$i / self::NBITS] &= ~(1 << ($i % self::NBITS));
+        $this->array[$i / self::BITS] &= ~(1 << ($i % self::BITS));
     }
 
     /**
-     * @param Bitset $other
+     * @param BitSet $other
      *
      * @return bool
      */
-    public function or(Bitset $other): bool
+    public function or(BitSet $other): bool
     {
-        /* @var $other ArrayBitset */
+        /* @var $other ArrayBitSet */
         assert($this->numBits === $other->numBits);
 
         $changed = false;
@@ -95,13 +95,13 @@ class ArrayBitset implements Bitset
      */
     public function getIterator(): \Generator
     {
-        $numElems = count($this->array);
-        for ($n = 0; $n < $numElems; $n++) {
+        $count = \count($this->array);
+        for ($n = 0; $n < $count; $n++) {
             $elem = $this->array[$n];
             if ($elem !== 0) {
-                for ($i = 0; $i < self::NBITS; $i++) {
+                for ($i = 0; $i < self::BITS; $i++) {
                     if ($elem & (1 << $i)) {
-                        yield $n * self::NBITS + $i;
+                        yield $n * self::BITS + $i;
                     }
                 }
             }

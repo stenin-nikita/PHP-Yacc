@@ -63,9 +63,9 @@ class PHP implements Language
     /**
      * @param string $text
      */
-    public function inline_comment(string $text)
+    public function inlineComment(string $text)
     {
-        $this->fileBuffer .= '/* '.$text.' */';
+        $this->fileBuffer .= sprintf('/* %s */', $text);
     }
 
     /**
@@ -73,7 +73,7 @@ class PHP implements Language
      */
     public function comment(string $text)
     {
-        $this->fileBuffer .= '//'.$text."\n";
+        $this->fileBuffer .= sprintf("// %s\n", $text);
     }
 
     /**
@@ -81,9 +81,11 @@ class PHP implements Language
      * @param int    $num
      * @param string $value
      */
-    public function case_block(string $indent, int $num, string $value)
+    public function caseBlock(string $indent, int $num, string $value)
     {
-        $this->fileBuffer .= \sprintf("%scase %d: return %s;\n", $indent, $num, \var_export($value, true));
+        $this->fileBuffer .= \sprintf(
+            "%scase %d: return %s;\n", $indent, $num, \var_export($value, true)
+        );
     }
 
     /**

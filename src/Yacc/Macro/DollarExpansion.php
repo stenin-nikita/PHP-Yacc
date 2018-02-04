@@ -19,10 +19,10 @@ use PhpYacc\Yacc\Token;
  */
 class DollarExpansion extends MacroAbstract
 {
-    const SEMVAL_LHS_TYPED = 1;
-    const SEMVAL_LHS_UNTYPED = 2;
-    const SEMVAL_RHS_TYPED = 3;
-    const SEMVAL_RHS_UNTYPED = 4;
+    const SEMVAL_LHS_TYPED      = 1;
+    const SEMVAL_LHS_UNTYPED    = 2;
+    const SEMVAL_RHS_TYPED      = 3;
+    const SEMVAL_RHS_UNTYPED    = 4;
 
     /**
      * @param Context   $ctx
@@ -43,12 +43,12 @@ class DollarExpansion extends MacroAbstract
             /** @var Token $token */
             $token = $tokens->current();
             switch ($token->getType()) {
-                case Token::NAME:
+                case Token::T_NAME:
                     $type = null;
                     $v = -1;
 
                     for ($i = 0; $i <= $n; $i++) {
-                        if ($symbols[$i]->name === $token->getValue()) {
+                        if ('$'.$symbols[$i]->name === $token->getValue()) {
                             if ($v < 0) {
                                 $v = $i;
                             } else {
@@ -71,37 +71,43 @@ class DollarExpansion extends MacroAbstract
                     }
 
                     if ($v >= 0) {
-                        $token = new Token($v === 0 ? Token::DOLLAR : 0, $token->getValue(), $token->getLine(), $token->getFilename());
+                        $token = new Token(
+                            $v === 0 ? Token::T_DOLLAR : 0,
+                            $token->getValue(),
+                            $token->getLine(),
+                            $token->getFilename()
+                        );
                         goto semval;
                     }
+
                     break;
 
-                case Token::DOLLAR:
+                case Token::T_DOLLAR:
                     $type = null;
                     $token = self::next($tokens);
-                    if ($token->getId() === '<') {
+                    if ($token->getValue()[0] === '<') {
                         $token = self::next($tokens);
-                        if ($token->getId() !== Token::NAME) {
-                            throw ParseException::unexpected($token, Token::NAME);
+                        if ($token->getType() !== Token::T_NAME) {
+                            throw ParseException::unexpected($token, Token::T_NAME);
                         }
                         $type = $ctx->intern($token->getValue());
                         $dump = self::next($tokens);
-                        if ($dump->getId() !== '>') {
+                        if ($dump->getValue()[0] !== '>') {
                             throw ParseException::unexpected($dump, '>');
                         }
                         $token = self::next($tokens);
                     }
 
-                    if ($token->getType() === Token::DOLLAR) {
+                    if ($token->getType() === Token::T_DOLLAR) {
                         $v = 0;
                     } elseif ($token->getValue()[0] === '-') {
                         $token = self::next($tokens);
-                        if ($token->getId() !== Token::NUMBER) {
-                            throw ParseException::unexpected($token, Token::NUMBER);
+                        if ($token->getType() !== Token::T_NUMBER) {
+                            throw ParseException::unexpected($token, Token::T_NUMBER);
                         }
                         $v = -1 * ((int) $token->getValue());
                     } else {
-                        if ($token->getId() !== Token::NUMBER) {
+                        if ($token->getType() !== Token::T_NUMBER) {
                             throw new \RuntimeException('Number expected');
                         }
                         $v = (int) $token->getValue();

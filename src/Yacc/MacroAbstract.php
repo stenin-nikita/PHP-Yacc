@@ -38,11 +38,11 @@ abstract class MacroAbstract implements Macro
                     $buffer .= $string[$i++];
                 } while ($i < $length && Utils::isSymChar($string[$i]));
 
-                $type = \ctype_digit($buffer) ? Token::NUMBER : Token::NAME;
+                $type = \ctype_digit($buffer) ? Token::T_NUMBER : Token::T_NAME;
                 $tokens[] = new Token($type, $buffer, $lineNumber, $filename);
                 $buffer = '';
             } else {
-                $tokens[] = new Token(Token::UNKNOW, $string[$i++], $lineNumber, $filename);
+                $tokens[] = new Token(Token::T_UNKNOWN, $string[$i++], $lineNumber, $filename);
             }
         }
 

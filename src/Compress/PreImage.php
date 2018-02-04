@@ -10,9 +10,9 @@ declare(strict_types=1);
 namespace PhpYacc\Compress;
 
 /**
- * Class Preimage.
+ * Class PreImage.
  */
-class Preimage
+class PreImage
 {
     /**
      * @var int
@@ -30,7 +30,7 @@ class Preimage
     public $length = 0;
 
     /**
-     * Preimage constructor.
+     * PreImage constructor.
      *
      * @param int $index
      */
@@ -40,8 +40,8 @@ class Preimage
     }
 
     /**
-     * @param Preimage $x
-     * @param Preimage $y
+     * @param PreImage $x
+     * @param PreImage $y
      *
      * @return int
      */
@@ -50,6 +50,7 @@ class Preimage
         if ($x->length !== $y->length) {
             return $x->length - $y->length;
         }
+
         foreach ($x->classes as $key => $value) {
             if ($value !== $y->classes[$key]) {
                 return $value - $y->classes[$key];

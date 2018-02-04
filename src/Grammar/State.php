@@ -65,7 +65,6 @@ class State
      */
     public function isReduceOnly(): bool
     {
-        return empty($this->shifts)
-            && $this->reduce[0]->symbol->isNilSymbol();
+        return empty($this->shifts) && $this->reduce[0]->symbol->isNilSymbol();
     }
 }

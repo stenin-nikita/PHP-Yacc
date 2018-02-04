@@ -1,4 +1,11 @@
 <?php
+/**
+ * This file is part of PHP-Yacc package.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+declare(strict_types=1);
 
 namespace PhpYacc\Lalr;
 
@@ -11,8 +18,9 @@ use PhpYacc\Lalr\Conflict\ShiftReduce;
 use PhpYacc\Support\Utils;
 use PhpYacc\Yacc\Production;
 
-require_once __DIR__.'/functions.php';
-
+/**
+ * Class Generator
+ */
 class Generator
 {
     const NON_ASSOC = -32768;
@@ -36,12 +44,12 @@ class Generator
     protected $visited = [];
 
     /**
-     * @var Bitset[]
+     * @var BitSet[]
      */
     protected $first;
 
     /**
-     * @var Bitset[]
+     * @var BitSet[]
      */
     protected $follow;
 
@@ -50,11 +58,30 @@ class Generator
      */
     protected $states;
 
-    protected $nlooks;
-    protected $nstates;
-    protected $nacts;
-    protected $nacts2;
-    protected $nnonleafstates;
+    /**
+     * @var int
+     */
+    protected $countLooks;
+
+    /**
+     * @var int
+     */
+    protected $countStates;
+
+    /**
+     * @var int
+     */
+    protected $countActions;
+
+    /**
+     * @var int
+     */
+    protected $countActions2;
+
+    /**
+     * @var int
+     */
+    protected $countNonLeafStates;
     protected $nsrerr;
     protected $nrrerr;
 
@@ -71,18 +98,19 @@ class Generator
         // Ensure nil symbol is part of nSymbols
         $this->context->nilSymbol();
         $this->context->finish();
-        $nSymbols = $this->context->nsymbols;
-        $this->nullable = array_fill(0, $nSymbols, false);
+        $countSymbols = $this->context->countSymbols;
+        $this->nullable = \array_fill(0, $countSymbols, false);
 
-        $this->blank = new ArrayBitset($nSymbols);
+        $this->blank = new ArrayBitSet($countSymbols);
         $this->states = [];
-        $this->nlooks = $this->nstates = $this->nacts = $this->nacts2 = 0;
-        $this->nnonleafstates = 0;
+        $this->countLooks = $this->countStates = $this->countActions = $this->countActions2 = 0;
+        $this->countNonLeafStates = 0;
         $this->nsrerr = $this->nrrerr = 0;
 
         $this->statesThrough = [];
         $this->first = [];
         $this->follow = [];
+
         foreach ($this->context->symbols as $s) {
             $this->first[$s->code] = clone $this->blank;
             $this->follow[$s->code] = clone $this->blank;
@@ -98,7 +126,7 @@ class Generator
         $this->printStatistics();
 
         $this->context->states = $this->states;
-        $this->context->nnonleafstates = $this->nnonleafstates;
+        $this->context->countNonLeafStates = $this->countNonLeafStates;
     }
 
     /**
@@ -135,7 +163,7 @@ class Generator
             for ($tp = $tmpList; $tp != null; $tp = $tp->next) {
                 /** @var Symbol $g */
                 $g = $tp->item[-1];
-                if ($g !== null && !$g->isterminal && !$this->visited[$g->code]) {
+                if ($g !== null && !$g->isTerminal && !$this->visited[$g->code]) {
                     $this->visited[$g->code] = true;
                     /** @var Production $gram */
                     for ($gram = $g->value; $gram != null; $gram = $gram->link) {
@@ -164,7 +192,7 @@ class Generator
             });
 
             // Compute next states
-            $nextst = [];
+            $nextStates = [];
             for ($tp = $tmpList; $tp !== null;) {
                 $sp = null;
 
@@ -176,11 +204,11 @@ class Generator
                 }
                 $sp->next = null;
 
-                $nextst[] = $this->findOrCreateState($g, $sublist);
+                $nextStates[] = $this->findOrCreateState($g, $sublist);
             }
 
-            $p->shifts = $nextst;
-            $this->nacts += count($nextst);
+            $p->shifts = $nextStates;
+            $this->countActions += \count($nextStates);
         }
     }
 
@@ -214,6 +242,7 @@ class Generator
                         $changed |= $y->look->or($x->look);
                     }
                 }
+
                 foreach ($p->shifts as $t) {
                     for ($x = $t->items; $x !== null; $x = $x->next) {
                         if ($x->left !== null) {
@@ -221,6 +250,7 @@ class Generator
                         }
                     }
                 }
+
                 for ($x = $p->items; $x !== null; $x = $x->next) {
                     if ($x->isTailItem() && $x->isHeadItem()) {
                         $x->look->or($this->follow[$x->item[-1]->code]);
@@ -235,7 +265,7 @@ class Generator
                 for ($x = $p->items; $x != null; $x = $x->next) {
                     $this->context->debug("\t".trim($x->item)."\n");
                     $this->context->debug("\t\t[ ");
-                    $this->context->debug(dumpSet($this->context, $x->look));
+                    $this->context->debug(Utils::dumpSet($this->context, $x->look));
                     $this->context->debug("]\n");
                 }
             }
@@ -250,6 +280,7 @@ class Generator
     protected function fillReduce()
     {
         $this->clearVisited();
+
         foreach ($this->states as $p) {
             /** @var Reduce[] $tmpr */
             $tmpr = [];
@@ -274,7 +305,7 @@ class Generator
                 // find shift/reduce conflict
                 foreach ($p->shifts as $m => $t) {
                     $e = $t->through;
-                    if (!$e->isterminal) {
+                    if (!$e->isTerminal) {
                         break;
                     }
                     if ($alook->testBit($e->code)) {
@@ -335,7 +366,7 @@ class Generator
                 });
 
                 $maxn = 0;
-                $nr = count($tmpr);
+                $nr = \count($tmpr);
                 for ($j = 0; $j < $nr;) {
                     for ($k = $j; $j < $nr; $j++) {
                         if ($tmpr[$j]->number != $tmpr[$k]->number) {
@@ -350,7 +381,7 @@ class Generator
             }
 
             // Squeeze tmpr
-            $tmpr = array_filter($tmpr, function (Reduce $reduce) use ($tdefact) {
+            $tmpr = \array_filter($tmpr, function (Reduce $reduce) use ($tdefact) {
                 return $reduce->number !== $tdefact;
             });
 
@@ -364,7 +395,7 @@ class Generator
             $tmpr[] = new Reduce($this->context->nilsymbol, $tdefact);
 
             // Squeeze shift actions (we deleted some keys)
-            $p->shifts = array_values($p->shifts);
+            $p->shifts = \array_values($p->shifts);
 
             foreach ($tmpr as $reduce) {
                 if ($reduce->number >= 0) {
@@ -374,7 +405,7 @@ class Generator
 
             // Register tmpr
             $p->reduce = $tmpr;
-            $this->nacts2 += count($tmpr);
+            $this->countActions2 += \count($tmpr);
         }
 
         $k = 0;
@@ -391,22 +422,23 @@ class Generator
 
         // Sort states in decreasing order of entries
         // do not move initial state
-        $initState = array_shift($this->states);
+        $initState = \array_shift($this->states);
+
         Utils::stableSort($this->states, function (State $p, State $q) {
             $numReduces = count($p->reduce) - 1; // -1 for default action
             $pt = $numReduces;
             $pn = count($p->shifts) + $numReduces;
             foreach ($p->shifts as $x) {
-                if ($x->through->isterminal) {
+                if ($x->through->isTerminal) {
                     $pt++;
                 }
             }
 
-            $numReduces = count($q->reduce) - 1; // -1 for default action
+            $numReduces = \count($q->reduce) - 1; // -1 for default action
             $qt = $numReduces;
-            $qn = count($q->shifts) + $numReduces;
+            $qn = \count($q->shifts) + $numReduces;
             foreach ($q->shifts as $x) {
-                if ($x->through->isterminal) {
+                if ($x->through->isTerminal) {
                     $qt++;
                 }
             }
@@ -417,12 +449,13 @@ class Generator
 
             return $qn - $pn;
         });
+
         array_unshift($this->states, $initState);
 
         foreach ($this->states as $i => $p) {
             $p->number = $i;
             if (!empty($p->shifts) || !$p->reduce[0]->symbol->isNilSymbol()) {
-                $this->nnonleafstates = $i + 1;
+                $this->countNonLeafStates = $i + 1;
             }
         }
 
@@ -470,7 +503,7 @@ class Generator
     protected function computeFollow(State $st)
     {
         foreach ($st->shifts as $t) {
-            if (!$t->through->isterminal) {
+            if (!$t->through->isTerminal) {
                 $this->follow[$t->through->code] = clone $this->blank;
                 for ($x = $t->items; $x !== null && !$x->isHeadItem(); $x = $x->next) {
                     $this->computeFirst($this->follow[$t->through->code], $x->item);
@@ -480,14 +513,14 @@ class Generator
         for ($x = $st->items; $x !== null; $x = $x->next) {
             /** @var Symbol $g */
             $g = $x->item[0] ?? null;
-            if ($g !== null && !$g->isterminal && $this->isSeqNullable($x->item->slice(1))) {
+            if ($g !== null && !$g->isTerminal && $this->isSeqNullable($x->item->slice(1))) {
                 $this->follow[$g->code]->or($x->look);
             }
         }
         do {
             $changed = false;
             foreach ($st->shifts as $t) {
-                if (!$t->through->isterminal) {
+                if (!$t->through->isTerminal) {
                     $p = $this->follow[$t->through->code];
                     for ($x = $t->items; $x !== null && !$x->isHeadItem(); $x = $x->next) {
                         if ($this->isSeqNullable($x->item) && $x->left != null) {
@@ -500,14 +533,14 @@ class Generator
     }
 
     /**
-     * @param Bitset $p
+     * @param BitSet $p
      * @param Item   $item
      */
-    protected function computeFirst(Bitset $p, Item $item)
+    protected function computeFirst(BitSet $p, Item $item)
     {
         /** @var Symbol $g */
         foreach ($item as $g) {
-            if ($g->isterminal) {
+            if ($g->isTerminal) {
                 $p->setBit($g->code);
 
                 return;
@@ -528,7 +561,7 @@ class Generator
     {
         /** @var Symbol $g */
         foreach ($item as $g) {
-            if ($g->isterminal || !$this->nullable[$g->code]) {
+            if ($g->isTerminal || !$this->nullable[$g->code]) {
                 return false;
             }
         }
@@ -545,7 +578,7 @@ class Generator
     protected function findOrCreateState(Symbol $through, Lr1 $sublist)
     {
         foreach ($this->statesThrough[$through->code] as $state) {
-            if (isSameSet($state->items, $sublist)) {
+            if (Utils::isSameSet($state->items, $sublist)) {
                 return $state;
             }
         }
@@ -553,7 +586,7 @@ class Generator
         $state = new State($through, $this->makeState($sublist));
         $this->states[] = $state;
         $this->statesThrough[$through->code][] = $state;
-        $this->nstates++;
+        $this->countStates++;
 
         return $state;
     }
@@ -599,7 +632,7 @@ class Generator
                 $h = $gram->body[0];
                 for ($s = 1; $s < count($gram->body); $s++) {
                     $g = $gram->body[$s];
-                    if ($g->isterminal) {
+                    if ($g->isTerminal) {
                         if (!$this->first[$h->code]->testBit($g->code)) {
                             $changed = true;
                             $this->first[$h->code]->setBit($g->code);
@@ -624,7 +657,7 @@ class Generator
             $this->context->debug("First:\n");
             foreach ($this->context->nonterminals as $symbol) {
                 $this->context->debug("{$symbol->name}\t[ ");
-                $this->context->debug(dumpSet($this->context, $this->first[$symbol->code]));
+                $this->context->debug(Utils::dumpSet($this->context, $this->first[$symbol->code]));
                 if ($this->nullable[$symbol->code]) {
                     $this->context->debug('@ ');
                 }
@@ -653,7 +686,7 @@ class Generator
             }
             if ($p->look === null) {
                 $p->look = clone $this->blank;
-                $this->nlooks++;
+                $this->countLooks++;
             }
             $tail = $p;
         }
@@ -661,7 +694,7 @@ class Generator
         for ($p = $items; $p !== null; $p = $p->next) {
             /** @var Symbol $g */
             $g = $p->item[0] ?? null;
-            if ($g !== null && !$g->isterminal) {
+            if ($g !== null && !$g->isTerminal) {
                 $tail = $this->findEmpty($tail, $g);
             }
         }
@@ -674,8 +707,8 @@ class Generator
      */
     protected function clearVisited()
     {
-        $nSymbols = $this->context->nsymbols;
-        $nGrams = $this->context->ngrams;
+        $nSymbols = $this->context->countSymbols;
+        $nGrams = $this->context->countGrams;
         $this->visited = array_fill(0, max($nSymbols, $nGrams), false);
     }
 
@@ -696,8 +729,8 @@ class Generator
                     $p = new Lr1(null, clone $this->blank, new Item($gram, 1));
                     $tail->next = $p;
                     $tail = $p;
-                    $this->nlooks++;
-                } elseif (!$gram->body[1]->isterminal) {
+                    $this->countLooks++;
+                } elseif (!$gram->body[1]->isTerminal) {
                     $tail = $this->findEmpty($tail, $gram->body[1]);
                 }
             }
@@ -764,7 +797,7 @@ class Generator
         }
 
         for ($x = $state->items; $x !== null; $x = $x->next) {
-            $this->context->debug("\t".trim($x->item)."\n");
+            $this->context->debug("\t".\trim((string) $x->item)."\n");
         }
         $this->context->debug("\n");
 
@@ -779,7 +812,7 @@ class Generator
             if ($s !== null && ($r === null || $s->through->code < $r->symbol->code)) {
                 $str = $s->through->name;
                 $this->context->debug(strlen($str) < 8 ? "\t$str\t\t" : "\t$str\t");
-                $this->context->debug($s->through->isterminal ? 'shift' : 'goto');
+                $this->context->debug($s->through->isTerminal ? 'shift' : 'goto');
                 $this->context->debug(' '.$s->number);
                 if ($s->isReduceOnly()) {
                     $this->context->debug(' and reduce ('.$s->reduce[0]->number.')');
@@ -836,19 +869,19 @@ class Generator
         $nterms = iterator_count($this->context->terminals);
         $nnonts = iterator_count($this->context->nonterminals);
 
-        $nprods = $this->context->ngrams;
-        $totalActs = $this->nacts + $this->nacts2;
+        $nprods = $this->context->countGrams;
+        $totalActs = $this->countActions + $this->countActions2;
 
         $this->context->debug("\nStatistics for {$this->context->filename}:\n");
         $this->context->debug("\t$nterms terminal symbols\n");
         $this->context->debug("\t$nnonts nonterminal symbols\n");
         $this->context->debug("\t$nprods productions\n");
-        $this->context->debug("\t$this->nstates states\n");
-        $this->context->debug("\t$this->nnonleafstates non leaf states\n");
+        $this->context->debug("\t$this->countStates states\n");
+        $this->context->debug("\t$this->countNonLeafStates non leaf states\n");
         $this->context->debug("\t$this->nsrerr shift/reduce, $this->nrrerr reduce/reduce conflicts\n");
         // items?
-        $this->context->debug("\t$this->nlooks lookahead sets used\n");
-        $this->context->debug("\t$this->nacts+$this->nacts2=$totalActs action entries\n");
+        $this->context->debug("\t$this->countLooks lookahead sets used\n");
+        $this->context->debug("\t$this->countActions+$this->countActions2=$totalActs action entries\n");
         // bytes used?
     }
 }

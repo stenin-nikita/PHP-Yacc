@@ -16,58 +16,58 @@ use PhpYacc\Exception\LexingException;
  */
 class Token
 {
-    public const EOF = -1;
-    public const UNKNOW = 0;
-    public const NAME = 1;
-    public const NUMBER = 2;
-    public const COLON = 3;
-    public const SPACE = 4;
-    public const NEWLINE = 5;
-    public const MARK = 6;
-    public const BEGININC = 7;
-    public const ENDINC = 8;
-    public const TOKEN = 9;
-    public const LEFT = 10;
-    public const RIGHT = 11;
-    public const NONASSOC = 12;
-    public const PRECTOK = 13;
-    public const TYPE = 14;
-    public const UNION = 15;
-    public const START = 16;
-    public const COMMENT = 17;
-    public const EXPECT = 18;
-    public const PURE_PARSER = 19;
-    public const STRING = 20;
-    public const COMMA = 21;
-    public const SEMICOLON = 22;
-    public const DOLLAR = 23;
+    public const T_EOF = -1;
+    public const T_UNKNOWN = 0;
+    public const T_NAME = 1;
+    public const T_NUMBER = 2;
+    public const T_COLON = 3;
+    public const T_SPACE = 4;
+    public const T_NEWLINE = 5;
+    public const T_MARK = 6;
+    public const T_BEGIN_INC = 7;
+    public const T_END_INC = 8;
+    public const T_TOKEN = 9;
+    public const T_LEFT = 10;
+    public const T_RIGHT = 11;
+    public const T_NON_ASSOC = 12;
+    public const T_PRECTOK = 13;
+    public const T_TYPE = 14;
+    public const T_UNION = 15;
+    public const T_START = 16;
+    public const T_COMMENT = 17;
+    public const T_EXPECT = 18;
+    public const T_PURE_PARSER = 19;
+    public const T_STRING = 20;
+    public const T_COMMA = 21;
+    public const T_SEMICOLON = 22;
+    public const T_DOLLAR = 23;
 
     private const TOKEN_MAP = [
-        self::NAME            => 'NAME',
-        self::NUMBER          => 'NUMBER',
-        self::COLON           => 'COLON',
-        self::SPACE           => 'SPACE',
-        self::NEWLINE         => 'NEWLINE',
-        self::MARK            => 'MARK',
-        self::BEGININC        => 'BEGININC',
-        self::ENDINC          => 'ENDINC',
-        self::TOKEN           => 'TOKEN',
-        self::LEFT            => 'LEFT',
-        self::RIGHT           => 'RIGHT',
-        self::NONASSOC        => 'NONASSOC',
-        self::PRECTOK         => 'PRECTOK',
-        self::TYPE            => 'TYPE',
-        self::UNION           => 'UNION',
-        self::START           => 'START',
-        self::COMMENT         => 'COMMENT',
-        self::EXPECT          => 'EXPECT',
-        self::PURE_PARSER     => 'PURE_PARSER',
-        self::EOF             => 'EOF',
-        self::UNKNOW          => 'UNKNOW',
-        self::STRING          => 'STRING',
-        self::COMMA           => 'COMMA',
-        self::SEMICOLON       => 'SEMICOLON',
-        self::DOLLAR          => 'DOLLAR',
+        self::T_NAME            => 'NAME',
+        self::T_NUMBER          => 'NUMBER',
+        self::T_COLON           => 'COLON',
+        self::T_SPACE           => 'SPACE',
+        self::T_NEWLINE         => 'NEWLINE',
+        self::T_MARK            => 'MARK',
+        self::T_BEGIN_INC        => 'BEGININC',
+        self::T_END_INC          => 'ENDINC',
+        self::T_TOKEN           => 'TOKEN',
+        self::T_LEFT            => 'LEFT',
+        self::T_RIGHT           => 'RIGHT',
+        self::T_NON_ASSOC        => 'NONASSOC',
+        self::T_PRECTOK         => 'PRECTOK',
+        self::T_TYPE            => 'TYPE',
+        self::T_UNION           => 'UNION',
+        self::T_START           => 'START',
+        self::T_COMMENT         => 'COMMENT',
+        self::T_EXPECT          => 'EXPECT',
+        self::T_PURE_PARSER     => 'PURE_PARSER',
+        self::T_EOF             => 'EOF',
+        self::T_UNKNOWN          => 'UNKNOW',
+        self::T_STRING          => 'STRING',
+        self::T_COMMA           => 'COMMA',
+        self::T_SEMICOLON       => 'SEMICOLON',
+        self::T_DOLLAR          => 'DOLLAR',
     ];
 
     /**
@@ -121,16 +121,6 @@ class Token
     }
 
     /**
-     * @deprecated
-     *
-     * @return int|string
-     */
-    public function getId()
-    {
-        return $this->type;
-    }
-
-    /**
      * @return string
      */
     public function getValue()
@@ -161,7 +151,7 @@ class Token
     {
         $tag = self::decode($this->type);
 
-        return sprintf('[%s:%d] %s(%s)', $this->filename, $this->line, $tag, $this->value);
+        return \sprintf('[%s:%d] %s(%s)', $this->filename, $this->line, $tag, $this->value);
     }
 
     /**

@@ -12,9 +12,9 @@ namespace PhpYacc\Lalr;
 /**
  * Class StringBitset.
  */
-class StringBitset implements Bitset
+class StringBitSet implements BitSet
 {
-    const NBITS = 8;
+    const BITS = 8;
 
     const MASKS = [
         "\x01",
@@ -38,14 +38,14 @@ class StringBitset implements Bitset
     public $str;
 
     /**
-     * StringBitset constructor.
+     * StringBitSet constructor.
      *
      * @param int $numBits
      */
     public function __construct(int $numBits)
     {
         $this->numBits = $numBits;
-        $this->str = \str_repeat("\0", \intdiv($numBits + self::NBITS - 1, self::NBITS));
+        $this->str = \str_repeat("\0", \intdiv($numBits + self::BITS - 1, self::BITS));
     }
 
     /**
@@ -55,9 +55,9 @@ class StringBitset implements Bitset
      */
     public function testBit(int $i): bool
     {
-        $offset = \intdiv($i, self::NBITS);
+        $offset = \intdiv($i, self::BITS);
 
-        return ((\ord($this->str[$offset]) >> ($i % self::NBITS)) & 1) !== 0;
+        return ((\ord($this->str[$offset]) >> ($i % self::BITS)) & 1) !== 0;
     }
 
     /**
@@ -65,9 +65,9 @@ class StringBitset implements Bitset
      */
     public function setBit(int $i)
     {
-        $offset = \intdiv($i, self::NBITS);
+        $offset = \intdiv($i, self::BITS);
         $char = $this->str[$offset];
-        $char |= self::MASKS[$i % self::NBITS];
+        $char |= self::MASKS[$i % self::BITS];
         $this->str[$offset] = $char;
     }
 
@@ -76,25 +76,25 @@ class StringBitset implements Bitset
      */
     public function clearBit(int $i)
     {
-        $offset = \intdiv($i, self::NBITS);
+        $offset = \intdiv($i, self::BITS);
         $char = $this->str[$offset];
-        $char &= ~self::MASKS[$i % self::NBITS];
+        $char &= ~self::MASKS[$i % self::BITS];
         $this->str[$offset] = $char;
     }
 
     /**
-     * @param Bitset $other
+     * @param BitSet $other
      *
      * @return bool
      */
-    public function or(Bitset $other): bool
+    public function or(BitSet $other): bool
     {
-        /* @var StringBitset $other */
+        /* @var StringBitSet $other */
         \assert($this->numBits === $other->numBits);
 
         $changed = false;
-        for ($i = 0; $i < $this->numBits; $i += self::NBITS) {
-            $offset = $i / self::NBITS;
+        for ($i = 0; $i < $this->numBits; $i += self::BITS) {
+            $offset = $i / self::BITS;
             if ("\0" !== ($other->str[$offset] & ~$this->str[$offset])) {
                 $changed = true;
                 $this->str[$offset] = $this->str[$offset] | $other->str[$offset];

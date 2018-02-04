@@ -32,7 +32,7 @@ class Lr1
     public $item;
 
     /**
-     * @var Bitset
+     * @var BitSet
      */
     public $look;
 
@@ -40,10 +40,10 @@ class Lr1
      * Lr1 constructor.
      *
      * @param Symbol|null $left
-     * @param Bitset      $look
+     * @param BitSet      $look
      * @param Item        $item
      */
-    public function __construct(Symbol $left = null, Bitset $look, Item $item)
+    public function __construct(Symbol $left = null, BitSet $look, Item $item)
     {
         $this->left = $left;
         $this->look = $look;

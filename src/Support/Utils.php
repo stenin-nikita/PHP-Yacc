@@ -8,6 +8,10 @@
 declare(strict_types=1);
 
 namespace PhpYacc\Support;
+use PhpYacc\Compress\Compress;
+use PhpYacc\Grammar\Context;
+use PhpYacc\Lalr\BitSet;
+use PhpYacc\Lalr\Lr1;
 
 /**
  * Class Utils.
@@ -121,5 +125,87 @@ final class Utils
         foreach ($indexedArray as $item) {
             $array[] = $item[0];
         }
+    }
+
+    /**
+     * @param array $array
+     * @param int $length
+     * @return bool
+     */
+    public static function vacantRow(array $array, int $length): bool
+    {
+        for ($i = 0; $i < $length; $i++) {
+            if ($array[$i] !== Compress::VACANT) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * @param array $a
+     * @param array $b
+     * @param int $length
+     * @return bool
+     */
+    public static function eqRow(array $a, array $b, int $length): bool
+    {
+        for ($i = 0; $i < $length; $i++) {
+            if ($a[$i] !== $b[$i]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * @param int $action
+     * @return string
+     */
+    public static function printAction(int $action): string
+    {
+        if ($action === Compress::VACANT) {
+            return '  . ';
+        }
+
+        return \sprintf('%4d', $action);
+    }
+
+    /**
+     * @param Lr1|null $left
+     * @param Lr1|null $right
+     * @return bool
+     */
+    public static function isSameSet(Lr1 $left = null, Lr1 $right = null): bool
+    {
+        $p = $left;
+        $t = $right;
+        while ($t !== null) {
+            // Not using !== here intentionally
+            if ($p === null || $p->item != $t->item) {
+                return false;
+            }
+            $p = $p->next;
+            $t = $t->next;
+        }
+        return $p === null || $p->isHeadItem();
+    }
+
+    /**
+     * @param Context $ctx
+     * @param BitSet $set
+     * @return string
+     */
+    public static function dumpSet(Context $ctx, BitSet $set): string
+    {
+        $result = '';
+        foreach ($set as $code) {
+            $symbol = $ctx->symbols[$code];
+            $result .= "{$symbol->name} ";
+        }
+
+        return $result;
     }
 }

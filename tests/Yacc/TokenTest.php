@@ -10,7 +10,7 @@ class TokenTest extends Testcase
 {
     public function testToString()
     {
-        $token = new Token(Token::TOKEN, "%token", 42, "foo.php");
+        $token = new Token(Token::T_TOKEN, "%token", 42, "foo.php");
         $this->assertEquals("[foo.php:42] Token::TOKEN (%token)", "$token");
     }
 

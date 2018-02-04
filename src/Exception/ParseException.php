@@ -24,6 +24,12 @@ class ParseException extends PhpYaccException
      */
     public static function unexpected(Token $token, $expecting): self
     {
-        return new self(\sprintf('Unexpected %s, expecting %s at %s:%d', Token::decode($token->t), Token::decode($expecting), $token->fn, $token->ln));
+        $fileName = $token->getFilename();
+        $line = $token->getLine();
+
+        return new self(\sprintf(
+            'Unexpected %s, expecting %s at %s:%d',
+            Token::decode($token->getType()), Token::decode($expecting), $fileName, $line
+        ));
     }
 }

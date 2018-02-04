@@ -78,7 +78,7 @@ class Item implements \ArrayAccess, \IteratorAggregate
     public function offsetGet($index)
     {
         if (!$this->offsetExists($index)) {
-            throw new \LogicException("Offset $index does not exist");
+            throw new LogicException("Offset $index does not exist");
         }
 
         return $this->production->body[$index + $this->pos];
@@ -92,15 +92,17 @@ class Item implements \ArrayAccess, \IteratorAggregate
      */
     public function offsetSet($index, $value)
     {
-        throw new \LogicException('Not supported');
+        throw new LogicException('Not supported');
     }
 
     /**
      * @param mixed $index
+     * @return void
+     * @throws LogicException
      */
     public function offsetUnset($index)
     {
-        throw new \LogicException('Not supported');
+        throw new LogicException('Not supported');
     }
 
     /**

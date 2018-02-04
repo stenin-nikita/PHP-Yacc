@@ -10,12 +10,12 @@ class LexerTest extends Testcase
     public static function provideTestAtoms()
     {
         return [
-            ["   \t", Token::SPACE],
-            ["\n", Token::NEWLINE],
-            ["/* Fooo*/", Token::COMMENT],
-            ["// Foo", Token::COMMENT],
-            ["%%", Token::MARK],
-            ["%token", Token::TOKEN],
+            ["   \t", Token::T_SPACE],
+            ["\n", Token::T_NEWLINE],
+            ["/* Fooo*/", Token::T_COMMENT],
+            ["// Foo", Token::T_COMMENT],
+            ["%%", Token::T_MARK],
+            ["%token", Token::T_TOKEN],
             ["'f'", "'"],
         ];
     }
