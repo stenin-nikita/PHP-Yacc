@@ -12,7 +12,6 @@ namespace PhpYacc\Yacc;
 use PhpYacc\Exception\ParseException;
 use PhpYacc\Grammar\Context;
 use PhpYacc\Grammar\Symbol;
-use PhpYacc\Support\Utils;
 
 /**
  * Class Parser.
@@ -368,10 +367,6 @@ class Parser
 
         while ($token->getType() === Token::T_NAME || $token->getType() === Token::T_STRING) {
             $p = $this->context->internSymbol($token->getValue(), true);
-
-            if ($p->name[0] === "'") {
-                $p->value = Utils::characterValue(\mb_substr($p->name, 1, -1));
-            }
 
             if ($type) {
                 $p->type = $type;

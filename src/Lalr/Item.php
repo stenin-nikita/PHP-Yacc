@@ -43,7 +43,7 @@ class Item implements \ArrayAccess, \IteratorAggregate
      */
     public function getIterator(): \Generator
     {
-        for ($i = $this->pos; $i < \count($this->production->body); $i++) {
+        for ($i = $this->pos, $l = \count($this->production->body); $i < $l; $i++) {
             yield $this->production->body[$i];
         }
     }
@@ -145,7 +145,7 @@ class Item implements \ArrayAccess, \IteratorAggregate
     public function __toString()
     {
         $result = '('.$this->production->num.')';
-        for ($i = 0; $i < \count($this->production->body); $i++) {
+        for ($i = 0, $l = \count($this->production->body); $i < $l; $i++) {
             if ($i === 1) {
                 $result .= ' :';
             }

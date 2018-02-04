@@ -73,12 +73,15 @@ class Compress
         $this->context->primof = \array_fill(0, $this->context->countStates, 0);
         $this->context->prims = \array_fill(0, $this->context->countStates, 0);
         $this->context->countPrims = 0;
+
         for ($i = 0; $i < $this->context->countStates;) {
             $p = $preImages[$i];
             $this->context->prims[$this->context->countPrims] = $p;
+
             for (; $i < $this->context->countStates && PreImage::compare($p, $preImages[$i]) === 0; $i++) {
                 $this->context->primof[$preImages[$i]->index] = $p;
             }
+
             $p->index = $this->context->countPrims++;
         }
     }
@@ -212,13 +215,15 @@ class Compress
         }
         $this->context->debug("\n");
         for ($j = 0; $j < $this->context->countTerminals; $j++) {
+            $symbol = $this->context->symbol($j);
+
             for ($i = 0; $i < $this->context->countNonLeafStates; $i++) {
-                if (self::VACANT !== $this->context->termAction[$i][$j]) {
+                if ($this->context->termAction[$i][$j] !== self::VACANT) {
                     break;
                 }
             }
             if ($i < $this->context->countNonLeafStates) {
-                $this->context->debug(\sprintf('%8.8s', $this->context->symbol($j)->name));
+                $this->context->debug(\sprintf('%8.8s', $symbol->name));
                 for ($i = 0; $i < $this->context->countClasses; $i++) {
                     $this->context->debug(Utils::printAction($this->context->classAction[$i][$j]));
                 }
@@ -249,20 +254,26 @@ class Compress
 
         $this->context->debug("\nNonterminal GOTO table:\n");
         $this->context->debug(\sprintf('%8.8s default', 'T\\S'));
+
         for ($i = 0; $i < $this->context->countNonLeafStates; $i++) {
             $this->context->debug(\sprintf('%4d', $i));
         }
+
         $this->context->debug("\n");
+
         foreach ($this->context->nonterminals as $symbol) {
             $nb = $this->nb($symbol);
+
             for ($i = 0; $i < $this->context->countNonLeafStates; $i++) {
                 if ($this->context->nonTermGoto[$i][$nb] > 0) {
                     break;
                 }
             }
+
             if ($i < $this->context->countNonLeafStates) {
                 $this->context->debug(\sprintf('%8.8s', $symbol->name));
                 $this->context->debug(\sprintf('%8d', $this->context->defaultGoto[$nb]));
+
                 for ($i = 0; $i < $this->context->countNonLeafStates; $i++) {
                     if ($this->context->nonTermGoto[$i][$nb] === $this->context->defaultGoto[$nb]) {
                         $this->context->debug('  = ');
@@ -438,6 +449,9 @@ class Compress
         $aux->gain = $gain;
     }
 
+    /**
+     * @return void
+     */
     private function authodoxTable()
     {
         // TODO

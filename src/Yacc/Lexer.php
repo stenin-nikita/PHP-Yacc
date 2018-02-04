@@ -316,7 +316,7 @@ class Lexer
 
         if ($this->char === '%') {
             $this->char = $this->getChar();
-            if ($this->char === '%' || $this->char === '{' | $this->char === '}' || Utils::isSymChar($this->char)) {
+            if ($this->char === '%' || \in_array($this->char, ['{', '}'], true) || Utils::isSymChar($this->char)) {
                 $this->value .= '%';
             } else {
                 $this->ungetChar($this->char);

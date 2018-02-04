@@ -202,7 +202,7 @@ class Template
                 } elseif ($this->metaMatch($p, 'endheader')) {
                     $this->copyHeader = false;
                 } elseif ($this->metaMatch($p, 'tailcode')) {
-                    //$this->printLine();
+                    $this->printLine();
                     $tailCode = true;
                     continue;
                 } elseif ($this->metaMatch($p, 'verification-table')) {
@@ -231,15 +231,19 @@ class Template
                 } elseif ($this->metaMatch($p, 'production-strings')) {
                     foreach ($this->context->grams as $gram) {
                         $info = \array_slice($gram->body, 0);
+
                         $this->language->write($buffer.'"');
                         $this->language->writeQuoted($info[0]->name);
                         $this->language->writeQuoted(' :');
+
                         if (\count($info) === 1) {
                             $this->language->writeQuoted(' /* empty */');
                         }
-                        for ($i = 1; $i < \count($info); $i++) {
+
+                        for ($i = 1, $l = \count($info); $i < $l; $i++) {
                             $this->language->writeQuoted(' '.$info[$i]->name);
                         }
+
                         if ($gram->num + 1 === $this->context->countGrams) {
                             $this->language->write("\"\n");
                         } else {
@@ -261,7 +265,7 @@ class Template
                 $lineChanged = true;
             } else {
                 if ($lineChanged) {
-                    //$this->printLine();
+                    $this->printLine();
                     $lineChanged = false;
                 }
                 $this->language->write($buffer, $this->copyHeader);

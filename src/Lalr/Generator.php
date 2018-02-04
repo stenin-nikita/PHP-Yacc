@@ -630,7 +630,7 @@ class Generator
             $changed = false;
             foreach ($this->context->grams as $gram) {
                 $h = $gram->body[0];
-                for ($s = 1; $s < count($gram->body); $s++) {
+                for ($s = 1, $l = \count($gram->body); $s < $l; $s++) {
                     $g = $gram->body[$s];
                     if ($g->isTerminal) {
                         if (!$this->first[$h->code]->testBit($g->code)) {

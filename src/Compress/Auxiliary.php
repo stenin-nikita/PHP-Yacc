@@ -22,6 +22,11 @@ class Auxiliary
     /**
      * @var int
      */
+    public $index;
+
+    /**
+     * @var int
+     */
     public $gain;
 
     /**
