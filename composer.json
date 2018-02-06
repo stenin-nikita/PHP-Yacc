@@ -1,23 +1,38 @@
 {
     "name": "stenin-nikita/php-yacc",
+    "type": "library",
     "description": "A PHP YACC Parser-Generator library",
     "license": "Apache 2.0",
+    "version": "dev-master",
     "authors": [
         {
             "name": "Anthony Ferrara",
             "email": "ircmaxell@php.net"
+        },
+        {
+            "name": "Nikita Stenin",
+            "email": "stenin.nikita@gmail.com"
         }
     ],
+    "bin": [
+        "bin/phpyacc"
+    ],
+    "require": {
+        "php": ">=7.1",
+        "symfony/console": ">=2.8|3.*|4.*"
+    },
     "autoload": {
         "psr-4": {
             "PhpYacc\\": "src/"
         }
     },
-    "require": {
-        "php": ">=7.0"
-    },
     "require-dev": {
-        "phpunit/phpunit": ">=6.3",
-        "phpstan/phpstan": ">=0.8"
-    }
+        "phpunit/phpunit": "~6.1",
+        "symfony/var-dumper": "~4.0"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "prefer-stable": true,
+    "minimum-stability": "dev"
 }

@@ -263,7 +263,7 @@ class Generator
             foreach ($this->states as $p) {
                 $this->context->debug("state unknown:\n");
                 for ($x = $p->items; $x != null; $x = $x->next) {
-                    $this->context->debug("\t".trim($x->item)."\n");
+                    $this->context->debug("\t".\trim((string) $x->item)."\n");
                     $this->context->debug("\t\t[ ");
                     $this->context->debug(Utils::dumpSet($this->context, $x->look));
                     $this->context->debug("]\n");

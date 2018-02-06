@@ -11,6 +11,20 @@ Right now, this is a direct port. Meaning that it works exactly like `kmyacc`. L
 
 Longer term, we want to add simplifying functionality. We will always support providing a template, but we will offer a series of default templates for common use-cases.
 
+## Basic Usage
+
+Require this package with composer:
+
+```bash
+composer require stenin-nikita/php-yacc
+```
+
+Run command in console:
+
+```bash
+vendor/bin/phpyacc -s "/path/to/template" -o "/path/to/output" -c "MyParser" "/path/to/grammar.phpy"
+```
+
 ## What can I do with this?
 
 You can parse most structured and unstructured grammars. There are some gotchas to [LALR(1) parsers](https://en.wikipedia.org/wiki/LALR_parser) that you need to be aware of (for example, Shift/Shift conflicts and Shift/Reduce conflicts). But those are beyond this simple intro.
