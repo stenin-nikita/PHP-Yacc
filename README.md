@@ -1,7 +1,10 @@
 # PHP-Yacc
 
-[![Scrutinizer CI](https://scrutinizer-ci.com/g/stenin-nikita/PHP-Yacc/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/stenin-nikita/PHP-Yacc/?branch=master)
 [![StyleCI](https://styleci.io/repos/115364047/shield?branch=master)](https://styleci.io/repos/115364047)
+[![Scrutinizer CI](https://scrutinizer-ci.com/g/stenin-nikita/PHP-Yacc/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/stenin-nikita/PHP-Yacc/?branch=master)
+[![Latest Stable Version](https://poser.pugx.org/stenin-nikita/php-yacc/v/stable)](https://packagist.org/packages/stenin-nikita/php-yacc)
+[![Latest Unstable Version](https://poser.pugx.org/stenin-nikita/php-yacc/v/unstable)](https://packagist.org/packages/stenin-nikita/php-yacc)
+[![License](https://poser.pugx.org/stenin-nikita/php-yacc/license)](https://packagist.org/packages/stenin-nikita/php-yacc)
 
 This is a port of [`kmyacc`](https://github.com/moriyoshi/kmyacc-forked) into PHP. It is a parser-generator, meaning it takes a YACC grammar file and generates a parser file.
 
