@@ -12,6 +12,7 @@ use PhpYacc\Console\GenerateCommand;
 use Symfony\Component\Console\Application;
 
 $loaders = [
+    __DIR__ . '/../../../autoload.php',
     __DIR__ . '/../vendor/autoload.php',
 ];
 
