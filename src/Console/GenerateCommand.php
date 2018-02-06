@@ -21,7 +21,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Class GenerateCommand
+ * Class GenerateCommand.
  */
 class GenerateCommand extends Command
 {
@@ -40,8 +40,9 @@ class GenerateCommand extends Command
     }
 
     /**
-     * @param InputInterface $input
+     * @param InputInterface  $input
      * @param OutputInterface $output
+     *
      * @return void
      */
     public function execute(InputInterface $input, OutputInterface $output): void
@@ -62,31 +63,34 @@ class GenerateCommand extends Command
 
     /**
      * @param InputInterface $input
+     *
      * @return void
      */
     private function validateInput(InputInterface $input): void
     {
         $skeleton = $input->getOption('skeleton');
-        if ($skeleton === null || ! \file_exists($skeleton)) {
+        if ($skeleton === null || !\file_exists($skeleton)) {
             throw new InvalidOptionException(\sprintf('The skeleton file "%s" is not found', $skeleton));
         }
 
         $grammar = $input->getArgument('grammar');
-        if (! \file_exists($grammar)) {
+        if (!\file_exists($grammar)) {
             throw new InvalidArgumentException(\sprintf('The grammar file "%s" is not found', $grammar));
         }
     }
 
     /**
      * @param Context $context
-     * @param string $grammar
-     * @param string $skeleton
-     * @param string $result
+     * @param string  $grammar
+     * @param string  $skeleton
+     * @param string  $result
+     *
      * @return void
      */
     private function generate(Context $context, string $grammar, string $skeleton, string $result): void
     {
         $generator = new Generator();
+
         try {
             $generator->generate($context, \file_get_contents($grammar), \file_get_contents($skeleton), $result);
         } catch (\Exception $e) {
