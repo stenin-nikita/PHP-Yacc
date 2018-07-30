@@ -94,7 +94,7 @@ class GenerateCommand extends Command
         try {
             $generator->generate($context, \file_get_contents($grammar), \file_get_contents($skeleton), $result);
         } catch (\Exception $e) {
-            throw new RuntimeException($e->getMessage());
+            throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
         }
     }
 }
